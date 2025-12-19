@@ -29,7 +29,7 @@ func (s *LedgerServer) CreateTransaction(ctx context.Context, req *pb.CreateTran
 		return nil, status.Error(codes.InvalidArgument, "transaction is required")
 	}
 
-	created, err := s.ledgerService.CreateTransaction(toModelTransaction(req.GetTransaction()))
+	created, err := s.ledgerService.CreateTransaction(ctx, toModelTransaction(req.GetTransaction()))
 	if err != nil {
 		if service.IsValidationError(err) {
 			return nil, status.Errorf(codes.InvalidArgument, "create transaction: %v", err)
@@ -48,7 +48,7 @@ func (s *LedgerServer) GetTransaction(ctx context.Context, req *pb.GetTransactio
 		return nil, status.Error(codes.InvalidArgument, "id is required")
 	}
 
-	transaction, err := s.ledgerService.GetTransaction(req.GetId())
+	transaction, err := s.ledgerService.GetTransaction(ctx, req.GetId())
 	if err != nil {
 		if service.IsNotFound(err) {
 			return nil, status.Error(codes.NotFound, "transaction not found")
@@ -64,7 +64,7 @@ func (s *LedgerServer) UpdateTransaction(ctx context.Context, req *pb.UpdateTran
 		return nil, status.Error(codes.InvalidArgument, "transaction is required")
 	}
 
-	updated, err := s.ledgerService.UpdateTransaction(toModelTransaction(req.GetTransaction()))
+	updated, err := s.ledgerService.UpdateTransaction(ctx, toModelTransaction(req.GetTransaction()))
 	if err != nil {
 		if service.IsNotFound(err) {
 			return nil, status.Error(codes.NotFound, "transaction not found")
@@ -83,7 +83,7 @@ func (s *LedgerServer) DeleteTransaction(ctx context.Context, req *pb.DeleteTran
 		return nil, status.Error(codes.InvalidArgument, "id is required")
 	}
 
-	if err := s.ledgerService.DeleteTransaction(req.GetId()); err != nil {
+	if err := s.ledgerService.DeleteTransaction(ctx, req.GetId()); err != nil {
 		if service.IsNotFound(err) {
 			return &pb.DeleteResponse{Deleted: false}, nil
 		}
@@ -97,7 +97,7 @@ func (s *LedgerServer) DeleteTransaction(ctx context.Context, req *pb.DeleteTran
 }
 
 func (s *LedgerServer) ListTransactions(ctx context.Context, req *pb.ListTransactionsRequest) (*pb.ListTransactionsResponse, error) {
-	items := s.ledgerService.ListTransactions(req.GetAccountId())
+	items := s.ledgerService.ListTransactions(ctx, req.GetAccountId())
 	resp := &pb.ListTransactionsResponse{}
 	resp.Transactions = make([]*pb.Transaction, 0, len(items))
 	for _, tx := range items {
@@ -111,7 +111,7 @@ func (s *LedgerServer) CreateBudget(ctx context.Context, req *pb.CreateBudgetReq
 		return nil, status.Error(codes.InvalidArgument, "budget is required")
 	}
 
-	created, err := s.ledgerService.CreateBudget(toModelBudget(req.GetBudget()))
+	created, err := s.ledgerService.CreateBudget(ctx, toModelBudget(req.GetBudget()))
 	if err != nil {
 		if service.IsValidationError(err) {
 			return nil, status.Errorf(codes.InvalidArgument, "create budget: %v", err)
@@ -130,7 +130,7 @@ func (s *LedgerServer) GetBudget(ctx context.Context, req *pb.GetBudgetRequest) 
 		return nil, status.Error(codes.InvalidArgument, "account_id is required")
 	}
 
-	budget, err := s.ledgerService.GetBudget(req.GetAccountId(), req.GetId())
+	budget, err := s.ledgerService.GetBudget(ctx, req.GetAccountId(), req.GetId())
 	if err != nil {
 		if service.IsNotFound(err) {
 			return nil, status.Error(codes.NotFound, "budget not found")
@@ -149,7 +149,7 @@ func (s *LedgerServer) UpdateBudget(ctx context.Context, req *pb.UpdateBudgetReq
 		return nil, status.Error(codes.InvalidArgument, "budget is required")
 	}
 
-	updated, err := s.ledgerService.UpdateBudget(toModelBudget(req.GetBudget()))
+	updated, err := s.ledgerService.UpdateBudget(ctx, toModelBudget(req.GetBudget()))
 	if err != nil {
 		if service.IsNotFound(err) {
 			return nil, status.Error(codes.NotFound, "budget not found")
@@ -171,7 +171,7 @@ func (s *LedgerServer) DeleteBudget(ctx context.Context, req *pb.DeleteBudgetReq
 		return nil, status.Error(codes.InvalidArgument, "account_id is required")
 	}
 
-	if err := s.ledgerService.DeleteBudget(req.GetAccountId(), req.GetId()); err != nil {
+	if err := s.ledgerService.DeleteBudget(ctx, req.GetAccountId(), req.GetId()); err != nil {
 		if service.IsNotFound(err) {
 			return &pb.DeleteResponse{Deleted: false}, nil
 		}
@@ -188,7 +188,7 @@ func (s *LedgerServer) ListBudgets(ctx context.Context, req *pb.ListBudgetsReque
 	if req.GetAccountId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "account_id is required")
 	}
-	items := s.ledgerService.ListBudgets(req.GetAccountId())
+	items := s.ledgerService.ListBudgets(ctx, req.GetAccountId())
 	resp := &pb.ListBudgetsResponse{}
 	resp.Budgets = make([]*pb.Budget, 0, len(items))
 	for _, budget := range items {
@@ -202,7 +202,7 @@ func (s *LedgerServer) CreateReport(ctx context.Context, req *pb.CreateReportReq
 		return nil, status.Error(codes.InvalidArgument, "report is required")
 	}
 
-	created, err := s.ledgerService.CreateReport(toModelReport(req.GetReport()))
+	created, err := s.ledgerService.CreateReport(ctx, toModelReport(req.GetReport()))
 	if err != nil {
 		if service.IsValidationError(err) {
 			return nil, status.Errorf(codes.InvalidArgument, "create report: %v", err)
@@ -221,7 +221,7 @@ func (s *LedgerServer) GetReport(ctx context.Context, req *pb.GetReportRequest) 
 		return nil, status.Error(codes.InvalidArgument, "account_id is required")
 	}
 
-	report, err := s.ledgerService.GetReport(req.GetAccountId(), req.GetId())
+	report, err := s.ledgerService.GetReport(ctx, req.GetAccountId(), req.GetId())
 	if err != nil {
 		if service.IsNotFound(err) {
 			return nil, status.Error(codes.NotFound, "report not found")
@@ -240,7 +240,7 @@ func (s *LedgerServer) UpdateReport(ctx context.Context, req *pb.UpdateReportReq
 		return nil, status.Error(codes.InvalidArgument, "report is required")
 	}
 
-	updated, err := s.ledgerService.UpdateReport(toModelReport(req.GetReport()))
+	updated, err := s.ledgerService.UpdateReport(ctx, toModelReport(req.GetReport()))
 	if err != nil {
 		if service.IsNotFound(err) {
 			return nil, status.Error(codes.NotFound, "report not found")
@@ -262,7 +262,7 @@ func (s *LedgerServer) DeleteReport(ctx context.Context, req *pb.DeleteReportReq
 		return nil, status.Error(codes.InvalidArgument, "account_id is required")
 	}
 
-	if err := s.ledgerService.DeleteReport(req.GetAccountId(), req.GetId()); err != nil {
+	if err := s.ledgerService.DeleteReport(ctx, req.GetAccountId(), req.GetId()); err != nil {
 		if service.IsNotFound(err) {
 			return &pb.DeleteResponse{Deleted: false}, nil
 		}
@@ -279,7 +279,7 @@ func (s *LedgerServer) ListReports(ctx context.Context, req *pb.ListReportsReque
 	if req.GetAccountId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "account_id is required")
 	}
-	items := s.ledgerService.ListReports(req.GetAccountId())
+	items := s.ledgerService.ListReports(ctx, req.GetAccountId())
 	resp := &pb.ListReportsResponse{}
 	resp.Reports = make([]*pb.Report, 0, len(items))
 	for _, report := range items {
@@ -296,7 +296,7 @@ func (s *LedgerServer) ImportTransactionsCsv(ctx context.Context, req *pb.Import
 		return nil, status.Error(codes.InvalidArgument, "csv_content is required")
 	}
 
-	count, err := s.ledgerService.ImportTransactionsCSV(req.GetAccountId(), req.GetCsvContent(), req.GetHasHeader())
+	count, err := s.ledgerService.ImportTransactionsCSV(ctx, req.GetAccountId(), req.GetCsvContent(), req.GetHasHeader())
 	if err != nil {
 		if service.IsValidationError(err) {
 			return nil, status.Errorf(codes.InvalidArgument, "import csv: %v", err)
@@ -308,7 +308,7 @@ func (s *LedgerServer) ImportTransactionsCsv(ctx context.Context, req *pb.Import
 }
 
 func (s *LedgerServer) ExportTransactionsCsv(ctx context.Context, req *pb.ExportTransactionsCsvRequest) (*pb.ExportTransactionsCsvResponse, error) {
-	csvContent, err := s.ledgerService.ExportTransactionsCSV(req.GetAccountId())
+	csvContent, err := s.ledgerService.ExportTransactionsCSV(ctx, req.GetAccountId())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "export csv: %v", err)
 	}

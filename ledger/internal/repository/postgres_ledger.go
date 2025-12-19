@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"context"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/Deevins/final-task-course-2-go-lang/ledger/internal/model"
@@ -20,62 +22,62 @@ func NewPostgresLedgerRepository(db *pgxpool.Pool) *PostgresLedgerRepository {
 	}
 }
 
-func (r *PostgresLedgerRepository) CreateTransaction(tx model.Transaction) (model.Transaction, error) {
-	return r.transactions.CreateTransaction(tx)
+func (r *PostgresLedgerRepository) CreateTransaction(ctx context.Context, tx model.Transaction) (model.Transaction, error) {
+	return r.transactions.CreateTransaction(ctx, tx)
 }
 
-func (r *PostgresLedgerRepository) GetTransaction(id string) (model.Transaction, error) {
-	return r.transactions.GetTransaction(id)
+func (r *PostgresLedgerRepository) GetTransaction(ctx context.Context, id string) (model.Transaction, error) {
+	return r.transactions.GetTransaction(ctx, id)
 }
 
-func (r *PostgresLedgerRepository) UpdateTransaction(tx model.Transaction) (model.Transaction, error) {
-	return r.transactions.UpdateTransaction(tx)
+func (r *PostgresLedgerRepository) UpdateTransaction(ctx context.Context, tx model.Transaction) (model.Transaction, error) {
+	return r.transactions.UpdateTransaction(ctx, tx)
 }
 
-func (r *PostgresLedgerRepository) DeleteTransaction(id string) error {
-	return r.transactions.DeleteTransaction(id)
+func (r *PostgresLedgerRepository) DeleteTransaction(ctx context.Context, id string) error {
+	return r.transactions.DeleteTransaction(ctx, id)
 }
 
-func (r *PostgresLedgerRepository) ListTransactions() []model.Transaction {
-	return r.transactions.ListTransactions()
+func (r *PostgresLedgerRepository) ListTransactions(ctx context.Context) []model.Transaction {
+	return r.transactions.ListTransactions(ctx)
 }
 
-func (r *PostgresLedgerRepository) CreateBudget(budget model.Budget) (model.Budget, error) {
-	return r.budgets.CreateBudget(budget)
+func (r *PostgresLedgerRepository) CreateBudget(ctx context.Context, budget model.Budget) (model.Budget, error) {
+	return r.budgets.CreateBudget(ctx, budget)
 }
 
-func (r *PostgresLedgerRepository) GetBudget(accountID, id string) (model.Budget, error) {
-	return r.budgets.GetBudget(accountID, id)
+func (r *PostgresLedgerRepository) GetBudget(ctx context.Context, accountID, id string) (model.Budget, error) {
+	return r.budgets.GetBudget(ctx, accountID, id)
 }
 
-func (r *PostgresLedgerRepository) UpdateBudget(budget model.Budget) (model.Budget, error) {
-	return r.budgets.UpdateBudget(budget)
+func (r *PostgresLedgerRepository) UpdateBudget(ctx context.Context, budget model.Budget) (model.Budget, error) {
+	return r.budgets.UpdateBudget(ctx, budget)
 }
 
-func (r *PostgresLedgerRepository) DeleteBudget(accountID, id string) error {
-	return r.budgets.DeleteBudget(accountID, id)
+func (r *PostgresLedgerRepository) DeleteBudget(ctx context.Context, accountID, id string) error {
+	return r.budgets.DeleteBudget(ctx, accountID, id)
 }
 
-func (r *PostgresLedgerRepository) ListBudgets(accountID string) []model.Budget {
-	return r.budgets.ListBudgets(accountID)
+func (r *PostgresLedgerRepository) ListBudgets(ctx context.Context, accountID string) []model.Budget {
+	return r.budgets.ListBudgets(ctx, accountID)
 }
 
-func (r *PostgresLedgerRepository) CreateReport(report model.Report) (model.Report, error) {
-	return r.reports.CreateReport(report)
+func (r *PostgresLedgerRepository) CreateReport(ctx context.Context, report model.Report) (model.Report, error) {
+	return r.reports.CreateReport(ctx, report)
 }
 
-func (r *PostgresLedgerRepository) GetReport(accountID, id string) (model.Report, error) {
-	return r.reports.GetReport(accountID, id)
+func (r *PostgresLedgerRepository) GetReport(ctx context.Context, accountID, id string) (model.Report, error) {
+	return r.reports.GetReport(ctx, accountID, id)
 }
 
-func (r *PostgresLedgerRepository) UpdateReport(report model.Report) (model.Report, error) {
-	return r.reports.UpdateReport(report)
+func (r *PostgresLedgerRepository) UpdateReport(ctx context.Context, report model.Report) (model.Report, error) {
+	return r.reports.UpdateReport(ctx, report)
 }
 
-func (r *PostgresLedgerRepository) DeleteReport(accountID, id string) error {
-	return r.reports.DeleteReport(accountID, id)
+func (r *PostgresLedgerRepository) DeleteReport(ctx context.Context, accountID, id string) error {
+	return r.reports.DeleteReport(ctx, accountID, id)
 }
 
-func (r *PostgresLedgerRepository) ListReports(accountID string) []model.Report {
-	return r.reports.ListReports(accountID)
+func (r *PostgresLedgerRepository) ListReports(ctx context.Context, accountID string) []model.Report {
+	return r.reports.ListReports(ctx, accountID)
 }

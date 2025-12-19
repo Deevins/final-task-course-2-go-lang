@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"context"
+
 	"github.com/Deevins/final-task-course-2-go-lang/auth/internal/model"
 	"github.com/Deevins/final-task-course-2-go-lang/auth/internal/storage"
 )
@@ -13,14 +15,14 @@ func NewInMemoryAuthRepository(store *storage.InMemoryAuthStorage) *InMemoryAuth
 	return &InMemoryAuthRepository{store: store}
 }
 
-func (r *InMemoryAuthRepository) CreateUser(user model.User) (model.User, error) {
+func (r *InMemoryAuthRepository) CreateUser(ctx context.Context, user model.User) (model.User, error) {
 	return r.store.CreateUser(user)
 }
 
-func (r *InMemoryAuthRepository) GetUserByEmail(email string) (model.User, error) {
+func (r *InMemoryAuthRepository) GetUserByEmail(ctx context.Context, email string) (model.User, error) {
 	return r.store.GetUserByEmail(email)
 }
 
-func (r *InMemoryAuthRepository) GetUserByID(id string) (model.User, error) {
+func (r *InMemoryAuthRepository) GetUserByID(ctx context.Context, id string) (model.User, error) {
 	return r.store.GetUserByID(id)
 }

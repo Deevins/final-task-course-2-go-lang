@@ -27,26 +27,26 @@ const (
 )
 
 type LedgerService interface {
-	CreateTransaction(tx model.Transaction) (model.Transaction, error)
-	GetTransaction(id string) (model.Transaction, error)
-	UpdateTransaction(tx model.Transaction) (model.Transaction, error)
-	DeleteTransaction(id string) error
-	ListTransactions(accountID string) []model.Transaction
+	CreateTransaction(ctx context.Context, tx model.Transaction) (model.Transaction, error)
+	GetTransaction(ctx context.Context, id string) (model.Transaction, error)
+	UpdateTransaction(ctx context.Context, tx model.Transaction) (model.Transaction, error)
+	DeleteTransaction(ctx context.Context, id string) error
+	ListTransactions(ctx context.Context, accountID string) []model.Transaction
 
-	CreateBudget(budget model.Budget) (model.Budget, error)
-	GetBudget(accountID, id string) (model.Budget, error)
-	UpdateBudget(budget model.Budget) (model.Budget, error)
-	DeleteBudget(accountID, id string) error
-	ListBudgets(accountID string) []model.Budget
+	CreateBudget(ctx context.Context, budget model.Budget) (model.Budget, error)
+	GetBudget(ctx context.Context, accountID, id string) (model.Budget, error)
+	UpdateBudget(ctx context.Context, budget model.Budget) (model.Budget, error)
+	DeleteBudget(ctx context.Context, accountID, id string) error
+	ListBudgets(ctx context.Context, accountID string) []model.Budget
 
-	CreateReport(report model.Report) (model.Report, error)
-	GetReport(accountID, id string) (model.Report, error)
-	UpdateReport(report model.Report) (model.Report, error)
-	DeleteReport(accountID, id string) error
-	ListReports(accountID string) []model.Report
+	CreateReport(ctx context.Context, report model.Report) (model.Report, error)
+	GetReport(ctx context.Context, accountID, id string) (model.Report, error)
+	UpdateReport(ctx context.Context, report model.Report) (model.Report, error)
+	DeleteReport(ctx context.Context, accountID, id string) error
+	ListReports(ctx context.Context, accountID string) []model.Report
 
-	ImportTransactionsCSV(accountID string, csvContent []byte, hasHeader bool) (int, error)
-	ExportTransactionsCSV(accountID string) ([]byte, error)
+	ImportTransactionsCSV(ctx context.Context, accountID string, csvContent []byte, hasHeader bool) (int, error)
+	ExportTransactionsCSV(ctx context.Context, accountID string) ([]byte, error)
 }
 
 type DefaultLedgerService struct {
@@ -58,7 +58,7 @@ func NewLedgerService(repo repository.LedgerRepository, cache *storage.ReportCac
 	return &DefaultLedgerService{repo: repo, cache: cache}
 }
 
-func (s *DefaultLedgerService) CreateTransaction(tx model.Transaction) (model.Transaction, error) {
+func (s *DefaultLedgerService) CreateTransaction(ctx context.Context, tx model.Transaction) (model.Transaction, error) {
 	now := time.Now().UTC()
 	if tx.ID == "" {
 		tx.ID = uuid.NewString()
@@ -68,18 +68,18 @@ func (s *DefaultLedgerService) CreateTransaction(tx model.Transaction) (model.Tr
 	}
 	tx.CreatedAt = now
 	tx.UpdatedAt = now
-	if err := s.ensureBudgetAvailable(tx); err != nil {
+	if err := s.ensureBudgetAvailable(ctx, tx); err != nil {
 		return model.Transaction{}, err
 	}
-	return s.repo.CreateTransaction(tx)
+	return s.repo.CreateTransaction(ctx, tx)
 }
 
-func (s *DefaultLedgerService) GetTransaction(id string) (model.Transaction, error) {
-	return s.repo.GetTransaction(id)
+func (s *DefaultLedgerService) GetTransaction(ctx context.Context, id string) (model.Transaction, error) {
+	return s.repo.GetTransaction(ctx, id)
 }
 
-func (s *DefaultLedgerService) UpdateTransaction(tx model.Transaction) (model.Transaction, error) {
-	current, err := s.repo.GetTransaction(tx.ID)
+func (s *DefaultLedgerService) UpdateTransaction(ctx context.Context, tx model.Transaction) (model.Transaction, error) {
+	current, err := s.repo.GetTransaction(ctx, tx.ID)
 	if err != nil {
 		return model.Transaction{}, err
 	}
@@ -88,15 +88,15 @@ func (s *DefaultLedgerService) UpdateTransaction(tx model.Transaction) (model.Tr
 	if tx.OccurredAt.IsZero() {
 		tx.OccurredAt = current.OccurredAt
 	}
-	return s.repo.UpdateTransaction(tx)
+	return s.repo.UpdateTransaction(ctx, tx)
 }
 
-func (s *DefaultLedgerService) DeleteTransaction(id string) error {
-	return s.repo.DeleteTransaction(id)
+func (s *DefaultLedgerService) DeleteTransaction(ctx context.Context, id string) error {
+	return s.repo.DeleteTransaction(ctx, id)
 }
 
-func (s *DefaultLedgerService) ListTransactions(accountID string) []model.Transaction {
-	items := s.repo.ListTransactions()
+func (s *DefaultLedgerService) ListTransactions(ctx context.Context, accountID string) []model.Transaction {
+	items := s.repo.ListTransactions(ctx)
 	if accountID == "" {
 		return items
 	}
@@ -109,22 +109,22 @@ func (s *DefaultLedgerService) ListTransactions(accountID string) []model.Transa
 	return filtered
 }
 
-func (s *DefaultLedgerService) CreateBudget(budget model.Budget) (model.Budget, error) {
+func (s *DefaultLedgerService) CreateBudget(ctx context.Context, budget model.Budget) (model.Budget, error) {
 	now := time.Now().UTC()
 	if budget.ID == "" {
 		budget.ID = uuid.NewString()
 	}
 	budget.CreatedAt = now
 	budget.UpdatedAt = now
-	return s.repo.CreateBudget(budget)
+	return s.repo.CreateBudget(ctx, budget)
 }
 
-func (s *DefaultLedgerService) GetBudget(accountID, id string) (model.Budget, error) {
-	return s.repo.GetBudget(accountID, id)
+func (s *DefaultLedgerService) GetBudget(ctx context.Context, accountID, id string) (model.Budget, error) {
+	return s.repo.GetBudget(ctx, accountID, id)
 }
 
-func (s *DefaultLedgerService) UpdateBudget(budget model.Budget) (model.Budget, error) {
-	current, err := s.repo.GetBudget(budget.AccountID, budget.ID)
+func (s *DefaultLedgerService) UpdateBudget(ctx context.Context, budget model.Budget) (model.Budget, error) {
+	current, err := s.repo.GetBudget(ctx, budget.AccountID, budget.ID)
 	if err != nil {
 		return model.Budget{}, err
 	}
@@ -136,18 +136,18 @@ func (s *DefaultLedgerService) UpdateBudget(budget model.Budget) (model.Budget, 
 	if budget.EndDate.IsZero() {
 		budget.EndDate = current.EndDate
 	}
-	return s.repo.UpdateBudget(budget)
+	return s.repo.UpdateBudget(ctx, budget)
 }
 
-func (s *DefaultLedgerService) DeleteBudget(accountID, id string) error {
-	return s.repo.DeleteBudget(accountID, id)
+func (s *DefaultLedgerService) DeleteBudget(ctx context.Context, accountID, id string) error {
+	return s.repo.DeleteBudget(ctx, accountID, id)
 }
 
-func (s *DefaultLedgerService) ListBudgets(accountID string) []model.Budget {
-	return s.repo.ListBudgets(accountID)
+func (s *DefaultLedgerService) ListBudgets(ctx context.Context, accountID string) []model.Budget {
+	return s.repo.ListBudgets(ctx, accountID)
 }
 
-func (s *DefaultLedgerService) CreateReport(report model.Report) (model.Report, error) {
+func (s *DefaultLedgerService) CreateReport(ctx context.Context, report model.Report) (model.Report, error) {
 	now := time.Now().UTC()
 	if report.ID == "" {
 		report.ID = uuid.NewString()
@@ -159,24 +159,24 @@ func (s *DefaultLedgerService) CreateReport(report model.Report) (model.Report, 
 	if err != nil {
 		return model.Report{}, err
 	}
-	transactions := s.ListTransactions(report.AccountID)
-	budgets := s.ListBudgets(report.AccountID)
+	transactions := s.ListTransactions(ctx, report.AccountID)
+	budgets := s.ListBudgets(ctx, report.AccountID)
 	reportTotals := buildReportSummary(transactions, budgets, start, end, report.Currency)
 	report.TotalIncome = reportTotals.TotalIncome
 	report.TotalExpense = reportTotals.TotalExpense
 	report.Currency = reportTotals.Currency
 	report.Categories = reportTotals.Categories
-	created, err := s.repo.CreateReport(report)
+	created, err := s.repo.CreateReport(ctx, report)
 	if err != nil {
 		return model.Report{}, err
 	}
-	s.cacheReport(created)
+	s.cacheReport(ctx, created)
 	return created, nil
 }
 
-func (s *DefaultLedgerService) GetReport(accountID, id string) (model.Report, error) {
+func (s *DefaultLedgerService) GetReport(ctx context.Context, accountID, id string) (model.Report, error) {
 	if s.cache != nil {
-		cached, err := s.cache.GetReport(context.Background(), id)
+		cached, err := s.cache.GetReport(ctx, id)
 		if err == nil {
 			if cached.AccountID != "" && cached.AccountID != accountID {
 				return model.Report{}, storage.ErrNotFound
@@ -187,16 +187,16 @@ func (s *DefaultLedgerService) GetReport(accountID, id string) (model.Report, er
 			return model.Report{}, err
 		}
 	}
-	report, err := s.repo.GetReport(accountID, id)
+	report, err := s.repo.GetReport(ctx, accountID, id)
 	if err != nil {
 		return model.Report{}, err
 	}
-	s.cacheReport(report)
+	s.cacheReport(ctx, report)
 	return report, nil
 }
 
-func (s *DefaultLedgerService) UpdateReport(report model.Report) (model.Report, error) {
-	current, err := s.repo.GetReport(report.AccountID, report.ID)
+func (s *DefaultLedgerService) UpdateReport(ctx context.Context, report model.Report) (model.Report, error) {
+	current, err := s.repo.GetReport(ctx, report.AccountID, report.ID)
 	if err != nil {
 		return model.Report{}, err
 	}
@@ -213,34 +213,34 @@ func (s *DefaultLedgerService) UpdateReport(report model.Report) (model.Report, 
 	if err != nil {
 		return model.Report{}, err
 	}
-	transactions := s.ListTransactions(report.AccountID)
-	budgets := s.ListBudgets(report.AccountID)
+	transactions := s.ListTransactions(ctx, report.AccountID)
+	budgets := s.ListBudgets(ctx, report.AccountID)
 	reportTotals := buildReportSummary(transactions, budgets, start, end, report.Currency)
 	report.TotalIncome = reportTotals.TotalIncome
 	report.TotalExpense = reportTotals.TotalExpense
 	report.Currency = reportTotals.Currency
 	report.Categories = reportTotals.Categories
-	updated, err := s.repo.UpdateReport(report)
+	updated, err := s.repo.UpdateReport(ctx, report)
 	if err != nil {
 		return model.Report{}, err
 	}
-	s.cacheReport(updated)
+	s.cacheReport(ctx, updated)
 	return updated, nil
 }
 
-func (s *DefaultLedgerService) DeleteReport(accountID, id string) error {
-	if err := s.repo.DeleteReport(accountID, id); err != nil {
+func (s *DefaultLedgerService) DeleteReport(ctx context.Context, accountID, id string) error {
+	if err := s.repo.DeleteReport(ctx, accountID, id); err != nil {
 		return err
 	}
-	s.invalidateReportCache(id)
+	s.invalidateReportCache(ctx, id)
 	return nil
 }
 
-func (s *DefaultLedgerService) ListReports(accountID string) []model.Report {
-	return s.repo.ListReports(accountID)
+func (s *DefaultLedgerService) ListReports(ctx context.Context, accountID string) []model.Report {
+	return s.repo.ListReports(ctx, accountID)
 }
 
-func (s *DefaultLedgerService) ImportTransactionsCSV(accountID string, csvContent []byte, hasHeader bool) (int, error) {
+func (s *DefaultLedgerService) ImportTransactionsCSV(ctx context.Context, accountID string, csvContent []byte, hasHeader bool) (int, error) {
 	reader := csv.NewReader(bytes.NewReader(csvContent))
 	records, err := reader.ReadAll()
 	if err != nil {
@@ -264,7 +264,7 @@ func (s *DefaultLedgerService) ImportTransactionsCSV(accountID string, csvConten
 			return count, fmt.Errorf("row %d: %w", i+1, err)
 		}
 
-		_, err = s.CreateTransaction(model.Transaction{
+		_, err = s.CreateTransaction(ctx, model.Transaction{
 			AccountID:   accountID,
 			Amount:      record.Amount,
 			Currency:    record.Currency,
@@ -280,8 +280,8 @@ func (s *DefaultLedgerService) ImportTransactionsCSV(accountID string, csvConten
 	return count, nil
 }
 
-func (s *DefaultLedgerService) ExportTransactionsCSV(accountID string) ([]byte, error) {
-	transactions := s.ListTransactions(accountID)
+func (s *DefaultLedgerService) ExportTransactionsCSV(ctx context.Context, accountID string) ([]byte, error) {
+	transactions := s.ListTransactions(ctx, accountID)
 	buf := &bytes.Buffer{}
 	writer := csv.NewWriter(buf)
 
@@ -309,16 +309,16 @@ func IsNotFound(err error) bool {
 	return err == storage.ErrNotFound
 }
 
-func (s *DefaultLedgerService) ensureBudgetAvailable(tx model.Transaction) error {
+func (s *DefaultLedgerService) ensureBudgetAvailable(ctx context.Context, tx model.Transaction) error {
 	if tx.Amount >= 0 {
 		return nil
 	}
-	budgets := s.repo.ListBudgets(tx.AccountID)
+	budgets := s.repo.ListBudgets(ctx, tx.AccountID)
 	if len(budgets) == 0 {
 		return nil
 	}
 	expense := -tx.Amount
-	transactions := s.ListTransactions(tx.AccountID)
+	transactions := s.ListTransactions(ctx, tx.AccountID)
 	for _, budget := range budgets {
 		if budget.Currency != tx.Currency {
 			continue
@@ -349,18 +349,18 @@ func (s *DefaultLedgerService) ensureBudgetAvailable(tx model.Transaction) error
 	return nil
 }
 
-func (s *DefaultLedgerService) cacheReport(report model.Report) {
+func (s *DefaultLedgerService) cacheReport(ctx context.Context, report model.Report) {
 	if s.cache == nil {
 		return
 	}
-	_ = s.cache.SetReport(context.Background(), report)
+	_ = s.cache.SetReport(ctx, report)
 }
 
-func (s *DefaultLedgerService) invalidateReportCache(id string) {
+func (s *DefaultLedgerService) invalidateReportCache(ctx context.Context, id string) {
 	if s.cache == nil {
 		return
 	}
-	_ = s.cache.DeleteReport(context.Background(), id)
+	_ = s.cache.DeleteReport(ctx, id)
 }
 
 type reportSummary struct {

@@ -27,7 +27,7 @@ func (s *AuthServer) SignUp(ctx context.Context, req *pb.SignUpRequest) (*pb.Sig
 		return nil, status.Error(codes.InvalidArgument, "email and password are required")
 	}
 
-	user, err := s.authService.Register(req.GetEmail(), req.GetPassword(), req.GetName())
+	user, err := s.authService.Register(ctx, req.GetEmail(), req.GetPassword(), req.GetName())
 	if err != nil {
 		if service.IsDuplicate(err) {
 			return nil, status.Error(codes.AlreadyExists, "user already exists")
@@ -43,7 +43,7 @@ func (s *AuthServer) SignIn(ctx context.Context, req *pb.SignInRequest) (*pb.Sig
 		return nil, status.Error(codes.InvalidArgument, "email and password are required")
 	}
 
-	token, err := s.authService.Login(req.GetEmail(), req.GetPassword())
+	token, err := s.authService.Login(ctx, req.GetEmail(), req.GetPassword())
 	if err != nil {
 		if err == service.ErrInvalidCredentials {
 			return nil, status.Error(codes.Unauthenticated, "invalid credentials")
@@ -65,7 +65,7 @@ func (s *AuthServer) ValidateToken(ctx context.Context, req *pb.ValidateTokenReq
 		return nil, status.Error(codes.InvalidArgument, "access_token is required")
 	}
 
-	token, valid, err := s.authService.ValidateToken(req.GetAccessToken())
+	token, valid, err := s.authService.ValidateToken(ctx, req.GetAccessToken())
 	if err != nil {
 		if service.IsNotFound(err) {
 			return &pb.ValidateTokenResponse{Valid: false}, nil
