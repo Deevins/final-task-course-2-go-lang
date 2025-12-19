@@ -119,6 +119,13 @@ func (s *ValidationService) ListReports() []model.Report {
 	return s.next.ListReports()
 }
 
+func (s *ValidationService) ExportReportSheet(reportID string) (model.ReportSheet, error) {
+	if reportID == "" {
+		return model.ReportSheet{}, fmt.Errorf("%w: report id is required", ErrValidation)
+	}
+	return s.next.ExportReportSheet(reportID)
+}
+
 func (s *ValidationService) ImportTransactionsCSV(csvContent []byte, hasHeader bool) (int, error) {
 	if len(csvContent) == 0 {
 		return 0, fmt.Errorf("%w: csv content is required", ErrValidation)

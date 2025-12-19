@@ -46,6 +46,7 @@ type LedgerService interface {
 
 	ImportTransactionsCSV(csvContent []byte, hasHeader bool) (int, error)
 	ExportTransactionsCSV(accountID string) ([]byte, error)
+	ExportReportSheet(reportID string) (model.ReportSheet, error)
 }
 
 type DefaultLedgerService struct {
@@ -205,6 +206,55 @@ func (s *DefaultLedgerService) DeleteReport(id string) error {
 
 func (s *DefaultLedgerService) ListReports() []model.Report {
 	return s.repo.ListReports()
+}
+
+func (s *DefaultLedgerService) ExportReportSheet(reportID string) (model.ReportSheet, error) {
+	report, err := s.repo.GetReport(reportID)
+	if err != nil {
+		return model.ReportSheet{}, err
+	}
+
+	categories := report.Categories
+	summary := model.ReportSheetSummary{
+		ReportID:     report.ID,
+		Name:         report.Name,
+		Period:       report.Period,
+		GeneratedAt:  report.GeneratedAt,
+		TotalIncome:  report.TotalIncome,
+		TotalExpense: report.TotalExpense,
+		Currency:     report.Currency,
+	}
+
+	if len(categories) == 0 || (summary.TotalIncome == 0 && summary.TotalExpense == 0) {
+		start, end, err := parsePeriod(report.Period)
+		if err != nil {
+			return model.ReportSheet{}, err
+		}
+		transactions := s.repo.ListTransactions()
+		budgets := s.repo.ListBudgets()
+		reportTotals := buildReportSummary(transactions, budgets, start, end, report.Currency)
+		summary.TotalIncome = reportTotals.TotalIncome
+		summary.TotalExpense = reportTotals.TotalExpense
+		if summary.Currency == "" {
+			summary.Currency = reportTotals.Currency
+		}
+		categories = reportTotals.Categories
+	}
+
+	sheetCategories := make([]model.ReportSheetCategory, 0, len(categories))
+	for _, category := range categories {
+		sheetCategories = append(sheetCategories, model.ReportSheetCategory{
+			Category:           category.Category,
+			TotalExpense:       category.TotalExpense,
+			BudgetAmount:       category.BudgetAmount,
+			BudgetUsagePercent: category.BudgetUsagePercent,
+		})
+	}
+
+	return model.ReportSheet{
+		Summary:    summary,
+		Categories: sheetCategories,
+	}, nil
 }
 
 func (s *DefaultLedgerService) ImportTransactionsCSV(csvContent []byte, hasHeader bool) (int, error) {
