@@ -82,23 +82,3 @@ type ImportTransactionsResponse struct {
 type ExportTransactionsResponse struct {
 	CSVContent string `json:"csv_content" example:"account_id,amount,currency,category,description,occurred_at"`
 }
-
-// SheetTransactionRow описывает строку транзакции для Sheets.
-type SheetTransactionRow struct {
-	AccountID   string    `json:"account_id" binding:"required" example:"22222222-2222-2222-2222-222222222222"`
-	Amount      float64   `json:"amount" binding:"required" example:"1250.50"`
-	Currency    string    `json:"currency" binding:"required" example:"RUB"`
-	Category    string    `json:"category" binding:"required" example:"Продукты"`
-	Description string    `json:"description" example:"Покупка в магазине"`
-	OccurredAt  time.Time `json:"occurred_at" binding:"required" example:"2024-01-01T10:00:00Z"`
-}
-
-// ImportTransactionsSheetRequest описывает импорт транзакций из Google Sheets.
-type ImportTransactionsSheetRequest struct {
-	Rows []SheetTransactionRow `json:"rows" binding:"required"`
-}
-
-// ImportTransactionsSheetResponse описывает результат импорта из Sheets.
-type ImportTransactionsSheetResponse struct {
-	Imported int32 `json:"imported" example:"3"`
-}
