@@ -60,6 +60,102 @@ curl -H "Authorization: Bearer <jwt>" \
   http://localhost:8081/api/ledger/transactions
 ```
 
+## Рабочий сценарий и юзкейс
+
+Ниже — короткий, но полный сценарий использования приложения: личный учет финансов,
+формирование бюджета по категориям и отчет за месяц.
+
+### 1) Запуск сервисов
+
+```bash
+make start
+```
+
+### 2) Регистрация и вход
+
+```bash
+curl -X POST http://localhost:8081/api/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "secret",
+    "name": "Иван Иванов"
+  }'
+```
+
+```bash
+curl -X POST http://localhost:8081/api/auth/signin \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "secret"
+  }'
+```
+
+Сохраните JWT из ответа — он нужен для всех запросов Ledger.
+
+### 3) Добавление транзакций
+
+Пример: доход (зарплата) и расход (продукты).
+
+```bash
+curl -X POST http://localhost:8081/api/ledger/transactions \
+  -H "Authorization: Bearer <jwt>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": 120000,
+    "currency": "RUB",
+    "category": "Зарплата",
+    "description": "Основная работа",
+    "occurred_at": "2024-01-10T09:00:00Z"
+  }'
+```
+
+```bash
+curl -X POST http://localhost:8081/api/ledger/transactions \
+  -H "Authorization: Bearer <jwt>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": 15000,
+    "currency": "RUB",
+    "category": "Продукты",
+    "description": "Еженедельные покупки",
+    "occurred_at": "2024-01-15T18:30:00Z"
+  }'
+```
+
+### 4) Установка бюджета на месяц
+
+Бюджет задается на месяц (первый день месяца в RFC3339) и категорию.
+
+```bash
+curl -X POST http://localhost:8081/api/ledger/budgets \
+  -H "Authorization: Bearer <jwt>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Продукты",
+    "month": "2024-01-01T00:00:00Z",
+    "amount": 30000,
+    "currency": "RUB"
+  }'
+```
+
+### 5) Формирование отчета
+
+```bash
+curl -X POST http://localhost:8081/api/ledger/reports \
+  -H "Authorization: Bearer <jwt>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Январь 2024",
+    "period": "2024-01",
+    "generated_at": "2024-01-31T23:59:59Z",
+    "currency": "RUB"
+  }'
+```
+
+Отчет вернет суммарные доходы/расходы и расход по категориям с учетом бюджета.
+
 ## Маршруты и примеры запросов
 
 ### Auth
