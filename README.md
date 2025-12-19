@@ -116,6 +116,8 @@ curl -X POST http://localhost:8081/api/auth/signin \
   - `POST /api/ledger/import`
   - `GET /api/ledger/export`
 
+Примечание: интеграции с GSheets нет — используется только CSV импорт/экспорт.
+
 Пример списка транзакций:
 
 ```bash
