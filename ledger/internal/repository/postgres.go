@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 
 	"github.com/jackc/pgx/v5"
@@ -25,6 +26,14 @@ type BudgetRepository interface {
 	UpdateBudget(budget model.Budget) (model.Budget, error)
 	DeleteBudget(id string) error
 	ListBudgets() []model.Budget
+}
+
+type ReportRepository interface {
+	CreateReport(report model.Report) (model.Report, error)
+	GetReport(id string) (model.Report, error)
+	UpdateReport(report model.Report) (model.Report, error)
+	DeleteReport(id string) error
+	ListReports() []model.Report
 }
 
 type PostgresTransactionRepository struct {
@@ -232,6 +241,152 @@ func (r *PostgresBudgetRepository) ListBudgets() []model.Budget {
 			return nil
 		}
 		items = append(items, budget)
+	}
+	if err := rows.Err(); err != nil {
+		return nil
+	}
+	return items
+}
+
+type PostgresReportRepository struct {
+	db *pgxpool.Pool
+}
+
+func NewPostgresReportRepository(db *pgxpool.Pool) *PostgresReportRepository {
+	return &PostgresReportRepository{db: db}
+}
+
+func (r *PostgresReportRepository) CreateReport(report model.Report) (model.Report, error) {
+	const query = `
+		INSERT INTO reports (id, name, period, generated_at, total_income, total_expense, currency, categories)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
+	categories, err := json.Marshal(report.Categories)
+	if err != nil {
+		return model.Report{}, err
+	}
+	_, err = r.db.Exec(
+		context.Background(),
+		query,
+		report.ID,
+		report.Name,
+		report.Period,
+		report.GeneratedAt,
+		report.TotalIncome,
+		report.TotalExpense,
+		report.Currency,
+		categories,
+	)
+	if err != nil {
+		return model.Report{}, err
+	}
+	return report, nil
+}
+
+func (r *PostgresReportRepository) GetReport(id string) (model.Report, error) {
+	const query = `
+		SELECT id, name, period, generated_at, total_income, total_expense, currency, categories
+		FROM reports
+		WHERE id = $1`
+	var report model.Report
+	var categories []byte
+	err := r.db.QueryRow(context.Background(), query, id).Scan(
+		&report.ID,
+		&report.Name,
+		&report.Period,
+		&report.GeneratedAt,
+		&report.TotalIncome,
+		&report.TotalExpense,
+		&report.Currency,
+		&categories,
+	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return model.Report{}, storage.ErrNotFound
+		}
+		return model.Report{}, err
+	}
+	if len(categories) > 0 {
+		if err := json.Unmarshal(categories, &report.Categories); err != nil {
+			return model.Report{}, err
+		}
+	}
+	return report, nil
+}
+
+func (r *PostgresReportRepository) UpdateReport(report model.Report) (model.Report, error) {
+	const query = `
+		UPDATE reports
+		SET name = $2, period = $3, generated_at = $4, total_income = $5, total_expense = $6, currency = $7, categories = $8
+		WHERE id = $1`
+	categories, err := json.Marshal(report.Categories)
+	if err != nil {
+		return model.Report{}, err
+	}
+	result, err := r.db.Exec(
+		context.Background(),
+		query,
+		report.ID,
+		report.Name,
+		report.Period,
+		report.GeneratedAt,
+		report.TotalIncome,
+		report.TotalExpense,
+		report.Currency,
+		categories,
+	)
+	if err != nil {
+		return model.Report{}, err
+	}
+	if result.RowsAffected() == 0 {
+		return model.Report{}, storage.ErrNotFound
+	}
+	return report, nil
+}
+
+func (r *PostgresReportRepository) DeleteReport(id string) error {
+	const query = `DELETE FROM reports WHERE id = $1`
+	result, err := r.db.Exec(context.Background(), query, id)
+	if err != nil {
+		return err
+	}
+	if result.RowsAffected() == 0 {
+		return storage.ErrNotFound
+	}
+	return nil
+}
+
+func (r *PostgresReportRepository) ListReports() []model.Report {
+	const query = `
+		SELECT id, name, period, generated_at, total_income, total_expense, currency, categories
+		FROM reports`
+	rows, err := r.db.Query(context.Background(), query)
+	if err != nil {
+		return nil
+	}
+	defer rows.Close()
+
+	items := []model.Report{}
+	for rows.Next() {
+		var report model.Report
+		var categories []byte
+		if err := rows.Scan(
+			&report.ID,
+			&report.Name,
+			&report.Period,
+			&report.GeneratedAt,
+			&report.TotalIncome,
+			&report.TotalExpense,
+			&report.Currency,
+			&categories,
+		); err != nil {
+			return nil
+		}
+		if len(categories) > 0 {
+			if err := json.Unmarshal(categories, &report.Categories); err != nil {
+				return nil
+			}
+		}
+		items = append(items, report)
 	}
 	if err := rows.Err(); err != nil {
 		return nil
