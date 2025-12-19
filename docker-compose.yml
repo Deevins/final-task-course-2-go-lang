@@ -1,21 +1,35 @@
 version: "3.9"
 
 services:
-  postgres:
+  auth-postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: auth
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d auth"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  ledger-postgres:
     image: postgres:16-alpine
     environment:
       POSTGRES_DB: ledger
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d ledger"]
       interval: 5s
       timeout: 5s
       retries: 5
 
-  redis:
+  ledger-redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
@@ -34,13 +48,13 @@ services:
       HTTP_PORT: "8082"
       GRPC_PORT: "9092"
       JWT_SECRET: "dev-secret"
-      AUTH_POSTGRES_DSN: "postgres://postgres:postgres@postgres:5432/ledger?sslmode=disable"
+      AUTH_POSTGRES_DSN: "postgres://postgres:postgres@auth-postgres:5432/auth?sslmode=disable"
     command: ["go", "run", "./cmd/server"]
     ports:
       - "8082:8082"
       - "9092:9092"
     depends_on:
-      postgres:
+      auth-postgres:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "bash -c '>/dev/tcp/localhost/8082'"]
@@ -56,8 +70,8 @@ services:
     environment:
       HTTP_PORT: "8083"
       GRPC_PORT: "9091"
-      POSTGRES_DSN: "postgres://postgres:postgres@postgres:5432/ledger?sslmode=disable"
-      REDIS_ADDR: "redis:6379"
+      POSTGRES_DSN: "postgres://postgres:postgres@ledger-postgres:5432/ledger?sslmode=disable"
+      REDIS_ADDR: "ledger-redis:6379"
       REDIS_PASSWORD: ""
       REDIS_DB: "0"
     command: ["go", "run", "./cmd/server"]
@@ -65,9 +79,9 @@ services:
       - "8083:8083"
       - "9091:9091"
     depends_on:
-      postgres:
+      ledger-postgres:
         condition: service_healthy
-      redis:
+      ledger-redis:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "bash -c '>/dev/tcp/localhost/8083'"]

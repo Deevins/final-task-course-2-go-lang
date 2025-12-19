@@ -30,21 +30,24 @@ make start
 - Auth gRPC: `localhost:9092`
 - Ledger HTTP: `http://localhost:8083`
 - Ledger gRPC: `localhost:9091`
-- Postgres: `localhost:5432` (DB `ledger`, пользователь `postgres`, пароль `postgres`)
-- Redis: `localhost:6379`
+- Auth Postgres: `localhost:5432` (DB `auth`, пользователь `postgres`, пароль `postgres`)
+- Ledger Postgres: `localhost:5433` (DB `ledger`, пользователь `postgres`, пароль `postgres`)
+- Ledger Redis: `localhost:6379`
 
 ## Миграции (Auth + Ledger)
 
-Запуск миграций Auth через Docker Compose:
+Запуск миграций Auth через Docker Compose (отдельная БД):
 
 ```bash
-docker compose run --rm auth sh -c "go install github.com/pressly/goose/v3/cmd/goose@latest && goose -dir /app/auth/migrations postgres \"postgres://postgres:postgres@postgres:5432/ledger?sslmode=disable\" up"
+docker compose up -d auth-postgres
+docker compose run --rm auth sh -c "go install github.com/pressly/goose/v3/cmd/goose@latest && goose -dir /app/auth/migrations postgres \"postgres://postgres:postgres@auth-postgres:5432/auth?sslmode=disable\" up"
 ```
 
-Запуск миграций Ledger через Docker Compose:
+Запуск миграций Ledger через Docker Compose (отдельная БД):
 
 ```bash
-docker compose run --rm ledger sh -c "go install github.com/pressly/goose/v3/cmd/goose@latest && POSTGRES_DSN=postgres://postgres:postgres@postgres:5432/ledger?sslmode=disable /app/ledger/scripts/migrate.sh"
+docker compose up -d ledger-postgres
+docker compose run --rm ledger sh -c "go install github.com/pressly/goose/v3/cmd/goose@latest && POSTGRES_DSN=postgres://postgres:postgres@ledger-postgres:5432/ledger?sslmode=disable /app/ledger/scripts/migrate.sh"
 ```
 
 ## Авторизация (JWT)
