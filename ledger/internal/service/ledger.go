@@ -462,6 +462,18 @@ func withinPeriod(target, start, end time.Time) bool {
 }
 
 func parsePeriod(value string) (time.Time, time.Time, error) {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return time.Time{}, time.Time{}, fmt.Errorf("%w: period is required", ErrValidation)
+	}
+	if !strings.Contains(value, "/") {
+		start, err := time.Parse("2006-01", value)
+		if err != nil {
+			return time.Time{}, time.Time{}, fmt.Errorf("%w: period must be in start/end or YYYY-MM format", ErrValidation)
+		}
+		end := start.AddDate(0, 1, 0).Add(-time.Nanosecond)
+		return start, end, nil
+	}
 	parts := strings.Split(value, "/")
 	if len(parts) != 2 {
 		return time.Time{}, time.Time{}, fmt.Errorf("%w: period must be in start/end format", ErrValidation)
