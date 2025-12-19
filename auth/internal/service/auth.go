@@ -2,18 +2,19 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 
+	"github.com/Deevins/final-task-course-2-go-lang/auth/internal/config"
 	"github.com/Deevins/final-task-course-2-go-lang/auth/internal/model"
 	"github.com/Deevins/final-task-course-2-go-lang/auth/internal/repository"
 	"github.com/Deevins/final-task-course-2-go-lang/auth/internal/storage"
 )
 
 var ErrInvalidCredentials = errors.New("invalid credentials")
-
-const tokenTTL = 24 * time.Hour
 
 type AuthService interface {
 	Register(email, password, name string) (model.User, error)
@@ -22,11 +23,12 @@ type AuthService interface {
 }
 
 type DefaultAuthService struct {
-	repo repository.AuthRepository
+	repo      repository.AuthRepository
+	jwtConfig config.JWTConfig
 }
 
-func NewAuthService(repo repository.AuthRepository) *DefaultAuthService {
-	return &DefaultAuthService{repo: repo}
+func NewAuthService(repo repository.AuthRepository, jwtConfig config.JWTConfig) *DefaultAuthService {
+	return &DefaultAuthService{repo: repo, jwtConfig: jwtConfig}
 }
 
 func (s *DefaultAuthService) Register(email, password, name string) (model.User, error) {
@@ -49,24 +51,61 @@ func (s *DefaultAuthService) Login(email, password string) (model.Token, error) 
 		return model.Token{}, ErrInvalidCredentials
 	}
 
-	token := model.Token{
-		AccessToken: uuid.NewString(),
-		UserID:      user.ID,
-		ExpiresAt:   time.Now().UTC().Add(tokenTTL),
+	expiresAt := time.Now().UTC().Add(s.jwtConfig.Expiry)
+	claims := jwt.RegisteredClaims{
+		Subject:   user.ID,
+		ExpiresAt: jwt.NewNumericDate(expiresAt),
+		IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 	}
-	s.repo.StoreToken(token)
-	return token, nil
+	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	accessToken, err := jwtToken.SignedString([]byte(s.jwtConfig.Secret))
+	if err != nil {
+		return model.Token{}, err
+	}
+
+	return model.Token{
+		AccessToken: accessToken,
+		UserID:      user.ID,
+		ExpiresAt:   expiresAt,
+	}, nil
 }
 
 func (s *DefaultAuthService) ValidateToken(accessToken string) (model.Token, bool, error) {
-	token, err := s.repo.GetToken(accessToken)
+	claims := &jwt.RegisteredClaims{}
+	parsedToken, err := jwt.ParseWithClaims(accessToken, claims, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %s", token.Method.Alg())
+		}
+		return []byte(s.jwtConfig.Secret), nil
+	})
 	if err != nil {
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			expiresAt := time.Time{}
+			if claims.ExpiresAt != nil {
+				expiresAt = claims.ExpiresAt.Time
+			}
+			return model.Token{
+				AccessToken: accessToken,
+				UserID:      claims.Subject,
+				ExpiresAt:   expiresAt,
+			}, false, nil
+		}
 		return model.Token{}, false, err
 	}
-	if time.Now().UTC().After(token.ExpiresAt) {
-		return token, false, nil
+	if !parsedToken.Valid {
+		return model.Token{}, false, nil
 	}
-	return token, true, nil
+
+	expiresAt := time.Time{}
+	if claims.ExpiresAt != nil {
+		expiresAt = claims.ExpiresAt.Time
+	}
+
+	return model.Token{
+		AccessToken: accessToken,
+		UserID:      claims.Subject,
+		ExpiresAt:   expiresAt,
+	}, true, nil
 }
 
 func IsNotFound(err error) bool {
