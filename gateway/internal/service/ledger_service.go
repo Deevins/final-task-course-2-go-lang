@@ -172,7 +172,6 @@ func (s *ledgerGatewayService) CreateReport(ctx context.Context, accountID strin
 			AccountId:   accountID,
 			Name:        req.Name,
 			Period:      req.Period,
-			GeneratedAt: timestamppb.New(req.GeneratedAt),
 			Currency:    req.Currency,
 		},
 	})
@@ -197,7 +196,6 @@ func (s *ledgerGatewayService) UpdateReport(ctx context.Context, accountID, id s
 			AccountId:   accountID,
 			Name:        req.Name,
 			Period:      req.Period,
-			GeneratedAt: timestamppb.New(req.GeneratedAt),
 			Currency:    req.Currency,
 		},
 	})
