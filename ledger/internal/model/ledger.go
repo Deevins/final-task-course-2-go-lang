@@ -52,3 +52,25 @@ type TransactionCSVRow struct {
 	Description string
 	OccurredAt  time.Time
 }
+
+type ReportSheetSummary struct {
+	ReportID     string    `json:"report_id"`
+	Name         string    `json:"name"`
+	Period       string    `json:"period"`
+	GeneratedAt  time.Time `json:"generated_at"`
+	TotalIncome  float64   `json:"total_income"`
+	TotalExpense float64   `json:"total_expense"`
+	Currency     string    `json:"currency"`
+}
+
+type ReportSheetCategory struct {
+	Category           string  `json:"category"`
+	TotalExpense       float64 `json:"total_expense"`
+	BudgetAmount       float64 `json:"budget_amount"`
+	BudgetUsagePercent float64 `json:"budget_usage_percent"`
+}
+
+type ReportSheet struct {
+	Summary    ReportSheetSummary    `json:"summary"`
+	Categories []ReportSheetCategory `json:"categories"`
+}
