@@ -82,7 +82,6 @@ services:
       - ./:/app
     environment:
       HTTP_ADDRESS: ":8081"
-      GRPC_ADDRESS: "ledger:9091"
       AUTH_GRPC_ADDRESS: "auth:9092"
       LEDGER_GRPC_ADDRESS: "ledger:9091"
     command: ["go", "run", "./cmd/gateway"]
