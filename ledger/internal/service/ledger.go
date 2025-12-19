@@ -198,7 +198,7 @@ func (s *DefaultLedgerService) UpdateReport(ctx context.Context, report model.Re
 		return model.Report{}, err
 	}
 	if report.GeneratedAt.IsZero() {
-		report.GeneratedAt = time.Now().UTC()
+		report.GeneratedAt = current.GeneratedAt
 	}
 	if report.Period == "" {
 		report.Period = current.Period

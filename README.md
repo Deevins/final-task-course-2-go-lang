@@ -149,12 +149,12 @@ curl -X POST http://localhost:8081/api/ledger/reports \
   -d '{
     "name": "Январь 2024",
     "period": "2024-01",
-    "generated_at": "2024-01-31T23:59:59Z",
     "currency": "RUB"
   }'
 ```
 
 Отчет вернет суммарные доходы/расходы и расход по категориям с учетом бюджета.
+Поле `generated_at` при необходимости можно передать вручную, иначе сервис заполнит его сам.
 
 ## Маршруты и примеры запросов
 
@@ -261,7 +261,6 @@ curl -X POST http://localhost:8081/api/ledger/reports \
   -d '{
     "name": "Январь 2024",
     "period": "2024-01",
-    "generated_at": "2024-01-31T23:59:59Z",
     "currency": "RUB"
   }'
 ```
@@ -275,10 +274,11 @@ curl -X POST http://localhost:8081/api/ledger/reports \
   -d '{
     "name": "Январь 2024",
     "period": "2024-01-01/2024-01-31",
-    "generated_at": "2024-01-31T23:59:59Z",
     "currency": "RUB"
   }'
 ```
+
+Поле `generated_at` можно не передавать — тогда сервис заполнит его текущим временем.
 
 Пример ответа отчета с разбивкой по категориям (при `budget_amount = 0` поле
 `budget_usage_percent` возвращается как `null`):

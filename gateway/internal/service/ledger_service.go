@@ -172,7 +172,7 @@ func (s *ledgerGatewayService) CreateReport(ctx context.Context, accountID strin
 			AccountId:   accountID,
 			Name:        req.Name,
 			Period:      req.Period,
-			GeneratedAt: timestamppb.New(req.GeneratedAt),
+			GeneratedAt: toProtoTimestamp(req.GeneratedAt),
 			Currency:    req.Currency,
 		},
 	})
@@ -197,7 +197,7 @@ func (s *ledgerGatewayService) UpdateReport(ctx context.Context, accountID, id s
 			AccountId:   accountID,
 			Name:        req.Name,
 			Period:      req.Period,
-			GeneratedAt: timestamppb.New(req.GeneratedAt),
+			GeneratedAt: toProtoTimestamp(req.GeneratedAt),
 			Currency:    req.Currency,
 		},
 	})
@@ -344,4 +344,11 @@ func toTime(ts *timestamppb.Timestamp) time.Time {
 		return time.Time{}
 	}
 	return ts.AsTime()
+}
+
+func toProtoTimestamp(value time.Time) *timestamppb.Timestamp {
+	if value.IsZero() {
+		return nil
+	}
+	return timestamppb.New(value)
 }
