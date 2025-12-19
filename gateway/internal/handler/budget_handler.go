@@ -29,6 +29,17 @@ func (h *BudgetHandler) Register(r *gin.RouterGroup) {
 	}
 }
 
+// ExportBudget godoc
+// @Summary Экспортировать бюджет в Google Sheets
+// @Description Записывает строки бюджета в Google Sheets.
+// @Tags budget
+// @Accept json
+// @Produce json
+// @Param request body model.ExportSimpleRequest true "Данные для экспорта"
+// @Success 200 {object} model.ExportSimpleResponse
+// @Failure 400 {object} model.ErrorResponse
+// @Failure 500 {object} model.ErrorResponse
+// @Router /api/budget/export [post]
 func (h *BudgetHandler) ExportBudget(c *gin.Context) {
 	var req model.ExportSimpleRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -47,6 +58,17 @@ func (h *BudgetHandler) ExportBudget(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// ImportBudget godoc
+// @Summary Импортировать бюджет из Google Sheets
+// @Description Возвращает строки бюджета из Google Sheets по идентификатору таблицы.
+// @Tags budget
+// @Produce json
+// @Param spreadsheet_id query string true "ID таблицы Google Sheets"
+// @Param sheet_name query string false "Имя листа" default(Report)
+// @Success 200 {object} model.BudgetRowsResponse
+// @Failure 400 {object} model.ErrorResponse
+// @Failure 500 {object} model.ErrorResponse
+// @Router /api/budget/import [get]
 func (h *BudgetHandler) ImportBudget(c *gin.Context) {
 	spreadsheetID := c.Query("spreadsheet_id")
 	if spreadsheetID == "" {
@@ -62,6 +84,14 @@ func (h *BudgetHandler) ImportBudget(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"rows": rows})
 }
 
+// DownloadBudget godoc
+// @Summary Скачать бюджет по умолчанию
+// @Description Возвращает строки бюджета по умолчанию.
+// @Tags budget
+// @Produce json
+// @Success 200 {object} model.BudgetRowsResponse
+// @Failure 500 {object} model.ErrorResponse
+// @Router /api/budget/download [get]
 func (h *BudgetHandler) DownloadBudget(c *gin.Context) {
 	rows, err := h.service.DownloadBudget(c.Request.Context())
 	if err != nil {

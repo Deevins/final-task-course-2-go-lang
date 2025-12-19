@@ -1,0 +1,700 @@
+swagger: "2.0"
+info:
+  description: HTTP API gateway for auth, ledger, and budget services.
+  title: Gateway API
+  version: "1.0"
+basePath: /
+schemes:
+  - http
+paths:
+  /api/auth/signup:
+    post:
+      tags:
+        - auth
+      summary: Зарегистрировать пользователя
+      description: Создает нового пользователя и возвращает его идентификатор.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: request
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/SignUpRequest'
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/SignUpResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  /api/auth/signin:
+    post:
+      tags:
+        - auth
+      summary: Войти в систему
+      description: Проверяет учетные данные и возвращает JWT токен.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: request
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/SignInRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/SignInResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  /api/ledger/transactions:
+    get:
+      tags:
+        - ledger
+      summary: Получить список транзакций
+      description: Возвращает транзакции пользователя из Ledger.
+      produces:
+        - application/json
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/TransactionsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+    post:
+      tags:
+        - ledger
+      summary: Создать транзакцию
+      description: Создает транзакцию. Если account_id не указан, берется из JWT.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: request
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CreateTransactionRequest'
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/Transaction'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  /api/ledger/budgets:
+    get:
+      tags:
+        - ledger
+      summary: Получить список бюджетов
+      description: Возвращает бюджеты из Ledger.
+      produces:
+        - application/json
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/BudgetsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+    post:
+      tags:
+        - ledger
+      summary: Создать бюджет
+      description: Создает бюджет в Ledger.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: request
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CreateBudgetRequest'
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/Budget'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  /api/ledger/reports:
+    get:
+      tags:
+        - ledger
+      summary: Получить список отчетов
+      description: Возвращает отчеты из Ledger.
+      produces:
+        - application/json
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ReportsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+    post:
+      tags:
+        - ledger
+      summary: Создать отчет
+      description: Создает отчет в Ledger.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: request
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CreateReportRequest'
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/Report'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  /api/ledger/import:
+    post:
+      tags:
+        - ledger
+      summary: Импортировать транзакции из CSV
+      description: Принимает CSV контент и импортирует транзакции.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: request
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ImportTransactionsRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ImportTransactionsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  /api/ledger/export:
+    get:
+      tags:
+        - ledger
+      summary: Экспортировать транзакции в CSV
+      description: Возвращает CSV контент транзакций пользователя.
+      produces:
+        - application/json
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ExportTransactionsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  /api/budget/export:
+    post:
+      tags:
+        - budget
+      summary: Экспортировать бюджет в Google Sheets
+      description: Записывает строки бюджета в Google Sheets.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: request
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ExportSimpleRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ExportSimpleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  /api/budget/import:
+    get:
+      tags:
+        - budget
+      summary: Импортировать бюджет из Google Sheets
+      description: Возвращает строки бюджета из Google Sheets по идентификатору таблицы.
+      produces:
+        - application/json
+      parameters:
+        - name: spreadsheet_id
+          in: query
+          required: true
+          type: string
+          description: ID таблицы Google Sheets
+        - name: sheet_name
+          in: query
+          required: false
+          type: string
+          description: Имя листа
+          default: Report
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/BudgetRowsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  /api/budget/download:
+    get:
+      tags:
+        - budget
+      summary: Скачать бюджет по умолчанию
+      description: Возвращает строки бюджета по умолчанию.
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/BudgetRowsResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+securityDefinitions:
+  BearerAuth:
+    type: apiKey
+    name: Authorization
+    in: header
+    description: Bearer JWT token. Example: 'Bearer {token}'
+definitions:
+  ErrorResponse:
+    type: object
+    properties:
+      error:
+        type: string
+        example: validation failed
+  SignUpRequest:
+    type: object
+    properties:
+      email:
+        type: string
+        example: user@example.com
+      password:
+        type: string
+        example: secret
+      name:
+        type: string
+        example: Иван Иванов
+    required:
+      - email
+      - password
+      - name
+  SignUpResponse:
+    type: object
+    properties:
+      user_id:
+        type: string
+        example: 11111111-1111-1111-1111-111111111111
+  SignInRequest:
+    type: object
+    properties:
+      email:
+        type: string
+        example: user@example.com
+      password:
+        type: string
+        example: secret
+    required:
+      - email
+      - password
+  SignInResponse:
+    type: object
+    properties:
+      access_token:
+        type: string
+        example: eyJhbGciOi...
+      expires_at:
+        type: string
+        format: date-time
+        example: 2024-01-01T10:00:00Z
+  Transaction:
+    type: object
+    properties:
+      id:
+        type: string
+        example: 11111111-1111-1111-1111-111111111111
+      account_id:
+        type: string
+        example: 22222222-2222-2222-2222-222222222222
+      amount:
+        type: number
+        format: double
+        example: 1250.5
+      currency:
+        type: string
+        example: RUB
+      category:
+        type: string
+        example: Продукты
+      description:
+        type: string
+        example: Покупка в магазине
+      occurred_at:
+        type: string
+        format: date-time
+        example: 2024-01-01T10:00:00Z
+      created_at:
+        type: string
+        format: date-time
+        example: 2024-01-01T10:00:00Z
+      updated_at:
+        type: string
+        format: date-time
+        example: 2024-01-01T10:00:00Z
+  CreateTransactionRequest:
+    type: object
+    properties:
+      account_id:
+        type: string
+        example: 22222222-2222-2222-2222-222222222222
+      amount:
+        type: number
+        format: double
+        example: 1250.5
+      currency:
+        type: string
+        example: RUB
+      category:
+        type: string
+        example: Продукты
+      description:
+        type: string
+        example: Покупка в магазине
+      occurred_at:
+        type: string
+        format: date-time
+        example: 2024-01-01T10:00:00Z
+    required:
+      - amount
+      - currency
+      - category
+      - occurred_at
+  Budget:
+    type: object
+    properties:
+      id:
+        type: string
+        example: 11111111-1111-1111-1111-111111111111
+      name:
+        type: string
+        example: Еда
+      amount:
+        type: number
+        format: double
+        example: 10000
+      currency:
+        type: string
+        example: RUB
+      period:
+        type: string
+        example: monthly
+      start_date:
+        type: string
+        format: date-time
+        example: 2024-01-01T00:00:00Z
+      end_date:
+        type: string
+        format: date-time
+        example: 2024-01-31T23:59:59Z
+      created_at:
+        type: string
+        format: date-time
+        example: 2024-01-01T00:00:00Z
+      updated_at:
+        type: string
+        format: date-time
+        example: 2024-01-01T00:00:00Z
+  CreateBudgetRequest:
+    type: object
+    properties:
+      name:
+        type: string
+        example: Еда
+      amount:
+        type: number
+        format: double
+        example: 10000
+      currency:
+        type: string
+        example: RUB
+      period:
+        type: string
+        example: monthly
+      start_date:
+        type: string
+        format: date-time
+        example: 2024-01-01T00:00:00Z
+      end_date:
+        type: string
+        format: date-time
+        example: 2024-01-31T23:59:59Z
+    required:
+      - name
+      - amount
+      - currency
+      - period
+      - start_date
+      - end_date
+  Report:
+    type: object
+    properties:
+      id:
+        type: string
+        example: 11111111-1111-1111-1111-111111111111
+      name:
+        type: string
+        example: Январь 2024
+      period:
+        type: string
+        example: 2024-01
+      generated_at:
+        type: string
+        format: date-time
+        example: 2024-01-31T23:59:59Z
+      total_income:
+        type: number
+        format: double
+        example: 50000
+      total_expense:
+        type: number
+        format: double
+        example: 30000
+      currency:
+        type: string
+        example: RUB
+  CreateReportRequest:
+    type: object
+    properties:
+      name:
+        type: string
+        example: Январь 2024
+      period:
+        type: string
+        example: 2024-01
+      generated_at:
+        type: string
+        format: date-time
+        example: 2024-01-31T23:59:59Z
+      currency:
+        type: string
+        example: RUB
+    required:
+      - name
+      - period
+      - generated_at
+      - currency
+  ImportTransactionsRequest:
+    type: object
+    properties:
+      csv_content:
+        type: string
+        example: account_id,amount,currency,category,description,occurred_at
+      has_header:
+        type: boolean
+    required:
+      - csv_content
+  ImportTransactionsResponse:
+    type: object
+    properties:
+      imported:
+        type: integer
+        format: int32
+        example: 3
+  ExportTransactionsResponse:
+    type: object
+    properties:
+      csv_content:
+        type: string
+        example: account_id,amount,currency,category,description,occurred_at
+  SimpleRow:
+    type: object
+    properties:
+      category:
+        type: string
+        example: Продукты
+      amount:
+        type: number
+        format: double
+        example: 1250.5
+  ExportSimpleRequest:
+    type: object
+    properties:
+      spreadsheet_id:
+        type: string
+        example: 1AbCDefGhijk
+      sheet_name:
+        type: string
+        example: Report
+      clear:
+        type: boolean
+      rows:
+        type: array
+        items:
+          $ref: '#/definitions/SimpleRow'
+    required:
+      - spreadsheet_id
+      - sheet_name
+      - rows
+  ExportSimpleResponse:
+    type: object
+    properties:
+      written_range:
+        type: string
+        example: Report!A1:B4
+      rows:
+        type: integer
+        example: 3
+      spreadsheet_url:
+        type: string
+        example: https://docs.google.com/spreadsheets/d/<ID>/edit
+  TransactionsResponse:
+    type: object
+    properties:
+      transactions:
+        type: array
+        items:
+          $ref: '#/definitions/Transaction'
+  BudgetsResponse:
+    type: object
+    properties:
+      budgets:
+        type: array
+        items:
+          $ref: '#/definitions/Budget'
+  ReportsResponse:
+    type: object
+    properties:
+      reports:
+        type: array
+        items:
+          $ref: '#/definitions/Report'
+  BudgetRowsResponse:
+    type: object
+    properties:
+      rows:
+        type: array
+        items:
+          $ref: '#/definitions/SimpleRow'

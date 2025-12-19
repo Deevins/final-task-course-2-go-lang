@@ -27,6 +27,17 @@ func (h *AuthHandler) Register(r *gin.RouterGroup) {
 	}
 }
 
+// SignUp godoc
+// @Summary Зарегистрировать пользователя
+// @Description Создает нового пользователя и возвращает его идентификатор.
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body model.SignUpRequest true "Данные регистрации"
+// @Success 201 {object} model.SignUpResponse
+// @Failure 400 {object} model.ErrorResponse
+// @Failure 500 {object} model.ErrorResponse
+// @Router /api/auth/signup [post]
 func (h *AuthHandler) SignUp(c *gin.Context) {
 	var req model.SignUpRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -43,6 +54,17 @@ func (h *AuthHandler) SignUp(c *gin.Context) {
 	c.JSON(http.StatusCreated, resp)
 }
 
+// SignIn godoc
+// @Summary Войти в систему
+// @Description Проверяет учетные данные и возвращает JWT токен.
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body model.SignInRequest true "Данные для входа"
+// @Success 200 {object} model.SignInResponse
+// @Failure 400 {object} model.ErrorResponse
+// @Failure 401 {object} model.ErrorResponse
+// @Router /api/auth/signin [post]
 func (h *AuthHandler) SignIn(c *gin.Context) {
 	var req model.SignInRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
