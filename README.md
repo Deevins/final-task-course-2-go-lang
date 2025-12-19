@@ -4,6 +4,39 @@ HTTP gateway для сервисов авторизации, бюджета и L
 
 Базовый адрес: `http://localhost:8081`
 
+## Запуск через Docker Compose
+
+```bash
+docker compose up
+```
+
+## Запуск через Make
+
+```bash
+make start
+```
+
+Команды:
+
+- `make up` — поднять все сервисы через Docker Compose
+- `make migrate` — накатить миграции (требуются для Ledger)
+- `make start` — поднять сервисы и выполнить миграции
+- `make down` — остановить сервисы
+
+После запуска сервисы доступны по адресам:
+
+- Gateway HTTP: `http://localhost:8081`
+- Auth HTTP: `http://localhost:8082`
+- Auth gRPC: `localhost:9092`
+- Ledger HTTP: `http://localhost:8083`
+- Ledger gRPC: `localhost:9091`
+- Postgres: `localhost:5432` (DB `ledger`, пользователь `postgres`, пароль `postgres`)
+- Redis: `localhost:6379`
+
+> Примечание: адрес gRPC сервиса бюджета задается переменной `GRPC_ADDRESS`.
+> В `docker-compose.yml` он направлен на ledger для упрощенного запуска,
+> при наличии отдельного budget-сервиса поменяйте его на нужный адрес.
+
 ## Авторизация
 
 Используйте Bearer JWT токен в заголовке `Authorization` для защищенных маршрутов Ledger.
