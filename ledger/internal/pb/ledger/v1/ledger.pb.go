@@ -1422,6 +1422,7 @@ type ImportTransactionsCsvRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	CsvContent    []byte                 `protobuf:"bytes,1,opt,name=csv_content,json=csvContent,proto3" json:"csv_content,omitempty"`
 	HasHeader     bool                   `protobuf:"varint,2,opt,name=has_header,json=hasHeader,proto3" json:"has_header,omitempty"`
+	AccountId     string                 `protobuf:"bytes,3,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1468,6 +1469,13 @@ func (x *ImportTransactionsCsvRequest) GetHasHeader() bool {
 		return x.HasHeader
 	}
 	return false
+}
+
+func (x *ImportTransactionsCsvRequest) GetAccountId() string {
+	if x != nil {
+		return x.AccountId
+	}
+	return ""
 }
 
 type ImportTransactionsCsvResponse struct {

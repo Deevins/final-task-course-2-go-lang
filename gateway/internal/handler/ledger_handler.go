@@ -569,7 +569,13 @@ func (h *LedgerHandler) ImportTransactions(c *gin.Context) {
 		return
 	}
 
-	imported, err := h.service.ImportTransactionsCSV(c.Request.Context(), []byte(req.CSVContent), req.HasHeader)
+	accountID := middleware.UserIDFromContext(c)
+	if accountID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "account_id is required"})
+		return
+	}
+
+	imported, err := h.service.ImportTransactionsCSV(c.Request.Context(), accountID, []byte(req.CSVContent), req.HasHeader)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

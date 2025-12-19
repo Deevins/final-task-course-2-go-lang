@@ -146,6 +146,7 @@ message ReportResponse {
 message ImportTransactionsCsvRequest {
   bytes csv_content = 1;
   bool has_header = 2;
+  string account_id = 3;
 }
 
 message ImportTransactionsCsvResponse {

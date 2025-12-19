@@ -45,7 +45,7 @@ type LedgerService interface {
 	DeleteReport(accountID, id string) error
 	ListReports(accountID string) []model.Report
 
-	ImportTransactionsCSV(csvContent []byte, hasHeader bool) (int, error)
+	ImportTransactionsCSV(accountID string, csvContent []byte, hasHeader bool) (int, error)
 	ExportTransactionsCSV(accountID string) ([]byte, error)
 }
 
@@ -240,7 +240,7 @@ func (s *DefaultLedgerService) ListReports(accountID string) []model.Report {
 	return s.repo.ListReports(accountID)
 }
 
-func (s *DefaultLedgerService) ImportTransactionsCSV(csvContent []byte, hasHeader bool) (int, error) {
+func (s *DefaultLedgerService) ImportTransactionsCSV(accountID string, csvContent []byte, hasHeader bool) (int, error) {
 	reader := csv.NewReader(bytes.NewReader(csvContent))
 	records, err := reader.ReadAll()
 	if err != nil {
@@ -265,7 +265,7 @@ func (s *DefaultLedgerService) ImportTransactionsCSV(csvContent []byte, hasHeade
 		}
 
 		_, err = s.CreateTransaction(model.Transaction{
-			AccountID:   record.AccountID,
+			AccountID:   accountID,
 			Amount:      record.Amount,
 			Currency:    record.Currency,
 			Category:    record.Category,

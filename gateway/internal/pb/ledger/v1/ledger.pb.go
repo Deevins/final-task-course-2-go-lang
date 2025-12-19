@@ -581,6 +581,7 @@ func (x *ReportResponse) GetReport() *Report {
 type ImportTransactionsCsvRequest struct {
 	CsvContent []byte
 	HasHeader  bool
+	AccountId  string
 }
 
 func (x *ImportTransactionsCsvRequest) GetCsvContent() []byte {
@@ -595,6 +596,13 @@ func (x *ImportTransactionsCsvRequest) GetHasHeader() bool {
 		return x.HasHeader
 	}
 	return false
+}
+
+func (x *ImportTransactionsCsvRequest) GetAccountId() string {
+	if x != nil {
+		return x.AccountId
+	}
+	return ""
 }
 
 type ImportTransactionsCsvResponse struct {
