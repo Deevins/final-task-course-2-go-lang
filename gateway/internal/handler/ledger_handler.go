@@ -35,6 +35,16 @@ func (h *LedgerHandler) Register(r *gin.RouterGroup, authMiddleware gin.HandlerF
 	}
 }
 
+// ListTransactions godoc
+// @Summary Получить список транзакций
+// @Description Возвращает транзакции пользователя из Ledger.
+// @Tags ledger
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} model.TransactionsResponse
+// @Failure 401 {object} model.ErrorResponse
+// @Failure 500 {object} model.ErrorResponse
+// @Router /api/ledger/transactions [get]
 func (h *LedgerHandler) ListTransactions(c *gin.Context) {
 	accountID := middleware.UserIDFromContext(c)
 	if accountID == "" {
@@ -50,6 +60,19 @@ func (h *LedgerHandler) ListTransactions(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"transactions": items})
 }
 
+// CreateTransaction godoc
+// @Summary Создать транзакцию
+// @Description Создает транзакцию. Если account_id не указан, берется из JWT.
+// @Tags ledger
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body model.CreateTransactionRequest true "Данные транзакции"
+// @Success 201 {object} model.Transaction
+// @Failure 400 {object} model.ErrorResponse
+// @Failure 401 {object} model.ErrorResponse
+// @Failure 500 {object} model.ErrorResponse
+// @Router /api/ledger/transactions [post]
 func (h *LedgerHandler) CreateTransaction(c *gin.Context) {
 	var req model.CreateTransactionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -73,6 +96,16 @@ func (h *LedgerHandler) CreateTransaction(c *gin.Context) {
 	c.JSON(http.StatusCreated, created)
 }
 
+// ListBudgets godoc
+// @Summary Получить список бюджетов
+// @Description Возвращает бюджеты из Ledger.
+// @Tags ledger
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} model.BudgetsResponse
+// @Failure 401 {object} model.ErrorResponse
+// @Failure 500 {object} model.ErrorResponse
+// @Router /api/ledger/budgets [get]
 func (h *LedgerHandler) ListBudgets(c *gin.Context) {
 	items, err := h.service.ListBudgets(c.Request.Context())
 	if err != nil {
@@ -82,6 +115,19 @@ func (h *LedgerHandler) ListBudgets(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"budgets": items})
 }
 
+// CreateBudget godoc
+// @Summary Создать бюджет
+// @Description Создает бюджет в Ledger.
+// @Tags ledger
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body model.CreateBudgetRequest true "Данные бюджета"
+// @Success 201 {object} model.Budget
+// @Failure 400 {object} model.ErrorResponse
+// @Failure 401 {object} model.ErrorResponse
+// @Failure 500 {object} model.ErrorResponse
+// @Router /api/ledger/budgets [post]
 func (h *LedgerHandler) CreateBudget(c *gin.Context) {
 	var req model.CreateBudgetRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -97,6 +143,16 @@ func (h *LedgerHandler) CreateBudget(c *gin.Context) {
 	c.JSON(http.StatusCreated, created)
 }
 
+// ListReports godoc
+// @Summary Получить список отчетов
+// @Description Возвращает отчеты из Ledger.
+// @Tags ledger
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} model.ReportsResponse
+// @Failure 401 {object} model.ErrorResponse
+// @Failure 500 {object} model.ErrorResponse
+// @Router /api/ledger/reports [get]
 func (h *LedgerHandler) ListReports(c *gin.Context) {
 	items, err := h.service.ListReports(c.Request.Context())
 	if err != nil {
@@ -106,6 +162,19 @@ func (h *LedgerHandler) ListReports(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"reports": items})
 }
 
+// CreateReport godoc
+// @Summary Создать отчет
+// @Description Создает отчет в Ledger.
+// @Tags ledger
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body model.CreateReportRequest true "Данные отчета"
+// @Success 201 {object} model.Report
+// @Failure 400 {object} model.ErrorResponse
+// @Failure 401 {object} model.ErrorResponse
+// @Failure 500 {object} model.ErrorResponse
+// @Router /api/ledger/reports [post]
 func (h *LedgerHandler) CreateReport(c *gin.Context) {
 	var req model.CreateReportRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -121,6 +190,19 @@ func (h *LedgerHandler) CreateReport(c *gin.Context) {
 	c.JSON(http.StatusCreated, created)
 }
 
+// ImportTransactions godoc
+// @Summary Импортировать транзакции из CSV
+// @Description Принимает CSV контент и импортирует транзакции.
+// @Tags ledger
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body model.ImportTransactionsRequest true "CSV данные"
+// @Success 200 {object} model.ImportTransactionsResponse
+// @Failure 400 {object} model.ErrorResponse
+// @Failure 401 {object} model.ErrorResponse
+// @Failure 500 {object} model.ErrorResponse
+// @Router /api/ledger/import [post]
 func (h *LedgerHandler) ImportTransactions(c *gin.Context) {
 	var req model.ImportTransactionsRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -136,6 +218,16 @@ func (h *LedgerHandler) ImportTransactions(c *gin.Context) {
 	c.JSON(http.StatusOK, model.ImportTransactionsResponse{Imported: imported})
 }
 
+// ExportTransactions godoc
+// @Summary Экспортировать транзакции в CSV
+// @Description Возвращает CSV контент транзакций пользователя.
+// @Tags ledger
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} model.ExportTransactionsResponse
+// @Failure 401 {object} model.ErrorResponse
+// @Failure 500 {object} model.ErrorResponse
+// @Router /api/ledger/export [get]
 func (h *LedgerHandler) ExportTransactions(c *gin.Context) {
 	accountID := middleware.UserIDFromContext(c)
 	if accountID == "" {
