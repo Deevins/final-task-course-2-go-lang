@@ -32,6 +32,7 @@ func main() {
 	store := storage.NewInMemoryLedgerStorage()
 	repo := repository.NewInMemoryLedgerRepository(store)
 	ledgerService := service.NewLedgerService(repo)
+	validatedService := service.NewValidationService(ledgerService)
 
 	healthHandler := httpHandler.NewHealthHandler()
 	api := r.Group("/api/v1")
@@ -57,7 +58,7 @@ func main() {
 	}
 
 	grpcSrv := grpc.NewServer()
-	pb.RegisterLedgerServiceServer(grpcSrv, grpcserver.NewLedgerServer(ledgerService))
+	pb.RegisterLedgerServiceServer(grpcSrv, grpcserver.NewLedgerServer(validatedService))
 
 	g, gctx := errgroup.WithContext(ctx)
 

@@ -6,19 +6,19 @@ import (
 )
 
 type LedgerRepository interface {
-	CreateTransaction(tx model.Transaction) model.Transaction
+	CreateTransaction(tx model.Transaction) (model.Transaction, error)
 	GetTransaction(id string) (model.Transaction, error)
 	UpdateTransaction(tx model.Transaction) (model.Transaction, error)
 	DeleteTransaction(id string) error
 	ListTransactions() []model.Transaction
 
-	CreateBudget(budget model.Budget) model.Budget
+	CreateBudget(budget model.Budget) (model.Budget, error)
 	GetBudget(id string) (model.Budget, error)
 	UpdateBudget(budget model.Budget) (model.Budget, error)
 	DeleteBudget(id string) error
 	ListBudgets() []model.Budget
 
-	CreateReport(report model.Report) model.Report
+	CreateReport(report model.Report) (model.Report, error)
 	GetReport(id string) (model.Report, error)
 	UpdateReport(report model.Report) (model.Report, error)
 	DeleteReport(id string) error
@@ -33,8 +33,8 @@ func NewInMemoryLedgerRepository(store *storage.InMemoryLedgerStorage) *InMemory
 	return &InMemoryLedgerRepository{store: store}
 }
 
-func (r *InMemoryLedgerRepository) CreateTransaction(tx model.Transaction) model.Transaction {
-	return r.store.CreateTransaction(tx)
+func (r *InMemoryLedgerRepository) CreateTransaction(tx model.Transaction) (model.Transaction, error) {
+	return r.store.CreateTransaction(tx), nil
 }
 
 func (r *InMemoryLedgerRepository) GetTransaction(id string) (model.Transaction, error) {
@@ -53,8 +53,8 @@ func (r *InMemoryLedgerRepository) ListTransactions() []model.Transaction {
 	return r.store.ListTransactions()
 }
 
-func (r *InMemoryLedgerRepository) CreateBudget(budget model.Budget) model.Budget {
-	return r.store.CreateBudget(budget)
+func (r *InMemoryLedgerRepository) CreateBudget(budget model.Budget) (model.Budget, error) {
+	return r.store.CreateBudget(budget), nil
 }
 
 func (r *InMemoryLedgerRepository) GetBudget(id string) (model.Budget, error) {
@@ -73,8 +73,8 @@ func (r *InMemoryLedgerRepository) ListBudgets() []model.Budget {
 	return r.store.ListBudgets()
 }
 
-func (r *InMemoryLedgerRepository) CreateReport(report model.Report) model.Report {
-	return r.store.CreateReport(report)
+func (r *InMemoryLedgerRepository) CreateReport(report model.Report) (model.Report, error) {
+	return r.store.CreateReport(report), nil
 }
 
 func (r *InMemoryLedgerRepository) GetReport(id string) (model.Report, error) {
