@@ -15,6 +15,7 @@ import (
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 
+	"github.com/Deevins/final-task-course-2-go-lang/ledger/internal/config"
 	"github.com/Deevins/final-task-course-2-go-lang/ledger/internal/grpcserver"
 	httpHandler "github.com/Deevins/final-task-course-2-go-lang/ledger/internal/handler/http"
 	pb "github.com/Deevins/final-task-course-2-go-lang/ledger/internal/pb/ledger/v1"
@@ -27,10 +28,29 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
+	cfg := config.Load()
+
 	r := gin.Default()
 
-	store := storage.NewInMemoryLedgerStorage()
-	repo := repository.NewInMemoryLedgerRepository(store)
+	db, err := storage.NewPostgresPool(ctx, cfg.PostgresDSN)
+	if err != nil {
+		log.Fatalf("connect postgres: %v", err)
+	}
+	defer func() {
+		db.Close()
+	}()
+
+	redisClient, err := storage.NewRedisClient(ctx, cfg.RedisAddr, cfg.RedisPass, cfg.RedisDB)
+	if err != nil {
+		log.Fatalf("connect redis: %v", err)
+	}
+	defer func() {
+		if err := redisClient.Close(); err != nil {
+			log.Printf("close redis: %v", err)
+		}
+	}()
+
+	repo := repository.NewPostgresLedgerRepository(db)
 	ledgerService := service.NewLedgerService(repo)
 	validatedService := service.NewValidationService(ledgerService)
 
@@ -38,14 +58,8 @@ func main() {
 	api := r.Group("/api/v1")
 	healthHandler.RegisterRoutes(api)
 
-	httpPort := os.Getenv("HTTP_PORT")
-	if httpPort == "" {
-		httpPort = "8081"
-	}
-	grpcPort := os.Getenv("GRPC_PORT")
-	if grpcPort == "" {
-		grpcPort = "9091"
-	}
+	httpPort := cfg.HTTPPort
+	grpcPort := cfg.GRPCPort
 
 	httpServer := &http.Server{
 		Addr:    ":" + httpPort,
