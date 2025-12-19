@@ -1392,7 +1392,8 @@
         },
         "period": {
           "type": "string",
-          "example": "2024-01/2024-01-31"
+          "description": "YYYY-MM или start/end (YYYY-MM-DD или RFC3339), например 2024-01-01/2024-01-31",
+          "example": "2024-01"
         },
         "generated_at": {
           "type": "string",
@@ -1428,7 +1429,8 @@
         },
         "period": {
           "type": "string",
-          "example": "2024-01/2024-01-31"
+          "description": "YYYY-MM или start/end (YYYY-MM-DD или RFC3339), например 2024-01-01/2024-01-31",
+          "example": "2024-01"
         },
         "generated_at": {
           "type": "string",
@@ -1600,7 +1602,8 @@
         },
         "period": {
           "type": "string",
-          "example": "2024-01/2024-01-31"
+          "description": "YYYY-MM или start/end (YYYY-MM-DD или RFC3339), например 2024-01-01/2024-01-31",
+          "example": "2024-01"
         },
         "generated_at": {
           "type": "string",

@@ -139,3 +139,37 @@ curl -X POST http://localhost:8081/api/ledger/transactions \
     "occurred_at": "2024-01-01T10:00:00Z"
   }'
 ```
+
+Период отчета (`period`) поддерживает оба формата:
+
+- `YYYY-MM` (месяц, например `2024-01`)
+- `start/end` — две даты, разделенные `/`, в формате `YYYY-MM-DD` или RFC3339
+  (например `2024-01-01/2024-01-31` или `2024-01-01T00:00:00Z/2024-01-31T23:59:59Z`)
+
+Пример создания отчета с месячным периодом:
+
+```bash
+curl -X POST http://localhost:8081/api/ledger/reports \
+  -H "Authorization: Bearer <jwt>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Январь 2024",
+    "period": "2024-01",
+    "generated_at": "2024-01-31T23:59:59Z",
+    "currency": "RUB"
+  }'
+```
+
+Пример создания отчета с диапазоном дат:
+
+```bash
+curl -X POST http://localhost:8081/api/ledger/reports \
+  -H "Authorization: Bearer <jwt>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Январь 2024",
+    "period": "2024-01-01/2024-01-31",
+    "generated_at": "2024-01-31T23:59:59Z",
+    "currency": "RUB"
+  }'
+```
