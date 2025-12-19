@@ -20,12 +20,12 @@ func NewPostgresAuthRepository(db *pgxpool.Pool) *PostgresAuthRepository {
 	return &PostgresAuthRepository{db: db}
 }
 
-func (r *PostgresAuthRepository) CreateUser(user model.User) (model.User, error) {
+func (r *PostgresAuthRepository) CreateUser(ctx context.Context, user model.User) (model.User, error) {
 	const query = `
 		INSERT INTO users (id, email, name, password_hash, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6)`
 	_, err := r.db.Exec(
-		context.Background(),
+		ctx,
 		query,
 		user.ID,
 		user.Email,
@@ -44,13 +44,13 @@ func (r *PostgresAuthRepository) CreateUser(user model.User) (model.User, error)
 	return user, nil
 }
 
-func (r *PostgresAuthRepository) GetUserByEmail(email string) (model.User, error) {
+func (r *PostgresAuthRepository) GetUserByEmail(ctx context.Context, email string) (model.User, error) {
 	const query = `
 		SELECT id, email, name, password_hash, created_at, updated_at
 		FROM users
 		WHERE email = $1`
 	var user model.User
-	err := r.db.QueryRow(context.Background(), query, email).Scan(
+	err := r.db.QueryRow(ctx, query, email).Scan(
 		&user.ID,
 		&user.Email,
 		&user.Name,
@@ -67,13 +67,13 @@ func (r *PostgresAuthRepository) GetUserByEmail(email string) (model.User, error
 	return user, nil
 }
 
-func (r *PostgresAuthRepository) GetUserByID(id string) (model.User, error) {
+func (r *PostgresAuthRepository) GetUserByID(ctx context.Context, id string) (model.User, error) {
 	const query = `
 		SELECT id, email, name, password_hash, created_at, updated_at
 		FROM users
 		WHERE id = $1`
 	var user model.User
-	err := r.db.QueryRow(context.Background(), query, id).Scan(
+	err := r.db.QueryRow(ctx, query, id).Scan(
 		&user.ID,
 		&user.Email,
 		&user.Name,

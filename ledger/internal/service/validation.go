@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/Deevins/final-task-course-2-go-lang/ledger/internal/model"
@@ -14,77 +15,77 @@ func NewValidationService(next LedgerService) *ValidationService {
 	return &ValidationService{next: next}
 }
 
-func (s *ValidationService) CreateTransaction(tx model.Transaction) (model.Transaction, error) {
+func (s *ValidationService) CreateTransaction(ctx context.Context, tx model.Transaction) (model.Transaction, error) {
 	if err := validateTransaction(tx, false); err != nil {
 		return model.Transaction{}, err
 	}
-	return s.next.CreateTransaction(tx)
+	return s.next.CreateTransaction(ctx, tx)
 }
 
-func (s *ValidationService) GetTransaction(id string) (model.Transaction, error) {
+func (s *ValidationService) GetTransaction(ctx context.Context, id string) (model.Transaction, error) {
 	if id == "" {
 		return model.Transaction{}, fmt.Errorf("%w: transaction id is required", ErrValidation)
 	}
-	return s.next.GetTransaction(id)
+	return s.next.GetTransaction(ctx, id)
 }
 
-func (s *ValidationService) UpdateTransaction(tx model.Transaction) (model.Transaction, error) {
+func (s *ValidationService) UpdateTransaction(ctx context.Context, tx model.Transaction) (model.Transaction, error) {
 	if err := validateTransaction(tx, true); err != nil {
 		return model.Transaction{}, err
 	}
-	return s.next.UpdateTransaction(tx)
+	return s.next.UpdateTransaction(ctx, tx)
 }
 
-func (s *ValidationService) DeleteTransaction(id string) error {
+func (s *ValidationService) DeleteTransaction(ctx context.Context, id string) error {
 	if id == "" {
 		return fmt.Errorf("%w: transaction id is required", ErrValidation)
 	}
-	return s.next.DeleteTransaction(id)
+	return s.next.DeleteTransaction(ctx, id)
 }
 
-func (s *ValidationService) ListTransactions(accountID string) []model.Transaction {
-	return s.next.ListTransactions(accountID)
+func (s *ValidationService) ListTransactions(ctx context.Context, accountID string) []model.Transaction {
+	return s.next.ListTransactions(ctx, accountID)
 }
 
-func (s *ValidationService) CreateBudget(budget model.Budget) (model.Budget, error) {
+func (s *ValidationService) CreateBudget(ctx context.Context, budget model.Budget) (model.Budget, error) {
 	if err := validateBudget(budget, false); err != nil {
 		return model.Budget{}, err
 	}
-	return s.next.CreateBudget(budget)
+	return s.next.CreateBudget(ctx, budget)
 }
 
-func (s *ValidationService) GetBudget(accountID, id string) (model.Budget, error) {
+func (s *ValidationService) GetBudget(ctx context.Context, accountID, id string) (model.Budget, error) {
 	if accountID == "" {
 		return model.Budget{}, fmt.Errorf("%w: account id is required", ErrValidation)
 	}
 	if id == "" {
 		return model.Budget{}, fmt.Errorf("%w: budget id is required", ErrValidation)
 	}
-	return s.next.GetBudget(accountID, id)
+	return s.next.GetBudget(ctx, accountID, id)
 }
 
-func (s *ValidationService) UpdateBudget(budget model.Budget) (model.Budget, error) {
+func (s *ValidationService) UpdateBudget(ctx context.Context, budget model.Budget) (model.Budget, error) {
 	if err := validateBudget(budget, true); err != nil {
 		return model.Budget{}, err
 	}
-	return s.next.UpdateBudget(budget)
+	return s.next.UpdateBudget(ctx, budget)
 }
 
-func (s *ValidationService) DeleteBudget(accountID, id string) error {
+func (s *ValidationService) DeleteBudget(ctx context.Context, accountID, id string) error {
 	if accountID == "" {
 		return fmt.Errorf("%w: account id is required", ErrValidation)
 	}
 	if id == "" {
 		return fmt.Errorf("%w: budget id is required", ErrValidation)
 	}
-	return s.next.DeleteBudget(accountID, id)
+	return s.next.DeleteBudget(ctx, accountID, id)
 }
 
-func (s *ValidationService) ListBudgets(accountID string) []model.Budget {
-	return s.next.ListBudgets(accountID)
+func (s *ValidationService) ListBudgets(ctx context.Context, accountID string) []model.Budget {
+	return s.next.ListBudgets(ctx, accountID)
 }
 
-func (s *ValidationService) CreateReport(report model.Report) (model.Report, error) {
+func (s *ValidationService) CreateReport(ctx context.Context, report model.Report) (model.Report, error) {
 	if report.AccountID == "" {
 		return model.Report{}, fmt.Errorf("%w: account id is required", ErrValidation)
 	}
@@ -94,20 +95,20 @@ func (s *ValidationService) CreateReport(report model.Report) (model.Report, err
 	if report.Name == "" {
 		return model.Report{}, fmt.Errorf("%w: report name is required", ErrValidation)
 	}
-	return s.next.CreateReport(report)
+	return s.next.CreateReport(ctx, report)
 }
 
-func (s *ValidationService) GetReport(accountID, id string) (model.Report, error) {
+func (s *ValidationService) GetReport(ctx context.Context, accountID, id string) (model.Report, error) {
 	if accountID == "" {
 		return model.Report{}, fmt.Errorf("%w: account id is required", ErrValidation)
 	}
 	if id == "" {
 		return model.Report{}, fmt.Errorf("%w: report id is required", ErrValidation)
 	}
-	return s.next.GetReport(accountID, id)
+	return s.next.GetReport(ctx, accountID, id)
 }
 
-func (s *ValidationService) UpdateReport(report model.Report) (model.Report, error) {
+func (s *ValidationService) UpdateReport(ctx context.Context, report model.Report) (model.Report, error) {
 	if report.ID == "" {
 		return model.Report{}, fmt.Errorf("%w: report id is required", ErrValidation)
 	}
@@ -120,35 +121,35 @@ func (s *ValidationService) UpdateReport(report model.Report) (model.Report, err
 	if report.Name == "" {
 		return model.Report{}, fmt.Errorf("%w: report name is required", ErrValidation)
 	}
-	return s.next.UpdateReport(report)
+	return s.next.UpdateReport(ctx, report)
 }
 
-func (s *ValidationService) DeleteReport(accountID, id string) error {
+func (s *ValidationService) DeleteReport(ctx context.Context, accountID, id string) error {
 	if accountID == "" {
 		return fmt.Errorf("%w: account id is required", ErrValidation)
 	}
 	if id == "" {
 		return fmt.Errorf("%w: report id is required", ErrValidation)
 	}
-	return s.next.DeleteReport(accountID, id)
+	return s.next.DeleteReport(ctx, accountID, id)
 }
 
-func (s *ValidationService) ListReports(accountID string) []model.Report {
-	return s.next.ListReports(accountID)
+func (s *ValidationService) ListReports(ctx context.Context, accountID string) []model.Report {
+	return s.next.ListReports(ctx, accountID)
 }
 
-func (s *ValidationService) ImportTransactionsCSV(accountID string, csvContent []byte, hasHeader bool) (int, error) {
+func (s *ValidationService) ImportTransactionsCSV(ctx context.Context, accountID string, csvContent []byte, hasHeader bool) (int, error) {
 	if accountID == "" {
 		return 0, fmt.Errorf("%w: account id is required", ErrValidation)
 	}
 	if len(csvContent) == 0 {
 		return 0, fmt.Errorf("%w: csv content is required", ErrValidation)
 	}
-	return s.next.ImportTransactionsCSV(accountID, csvContent, hasHeader)
+	return s.next.ImportTransactionsCSV(ctx, accountID, csvContent, hasHeader)
 }
 
-func (s *ValidationService) ExportTransactionsCSV(accountID string) ([]byte, error) {
-	return s.next.ExportTransactionsCSV(accountID)
+func (s *ValidationService) ExportTransactionsCSV(ctx context.Context, accountID string) ([]byte, error) {
+	return s.next.ExportTransactionsCSV(ctx, accountID)
 }
 
 func validateTransaction(tx model.Transaction, requireID bool) error {

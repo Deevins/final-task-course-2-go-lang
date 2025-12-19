@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
@@ -18,9 +19,9 @@ import (
 var ErrInvalidCredentials = errors.New("invalid credentials")
 
 type AuthService interface {
-	Register(email, password, name string) (model.User, error)
-	Login(email, password string) (model.Token, error)
-	ValidateToken(accessToken string) (model.Token, bool, error)
+	Register(ctx context.Context, email, password, name string) (model.User, error)
+	Login(ctx context.Context, email, password string) (model.Token, error)
+	ValidateToken(ctx context.Context, accessToken string) (model.Token, bool, error)
 }
 
 type DefaultAuthService struct {
@@ -32,7 +33,7 @@ func NewAuthService(repo repository.AuthRepository, jwtConfig config.JWTConfig) 
 	return &DefaultAuthService{repo: repo, jwtConfig: jwtConfig}
 }
 
-func (s *DefaultAuthService) Register(email, password, name string) (model.User, error) {
+func (s *DefaultAuthService) Register(ctx context.Context, email, password, name string) (model.User, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return model.User{}, err
@@ -46,11 +47,11 @@ func (s *DefaultAuthService) Register(email, password, name string) (model.User,
 		CreatedAt:    now,
 		UpdatedAt:    now,
 	}
-	return s.repo.CreateUser(user)
+	return s.repo.CreateUser(ctx, user)
 }
 
-func (s *DefaultAuthService) Login(email, password string) (model.Token, error) {
-	user, err := s.repo.GetUserByEmail(email)
+func (s *DefaultAuthService) Login(ctx context.Context, email, password string) (model.Token, error) {
+	user, err := s.repo.GetUserByEmail(ctx, email)
 	if err != nil {
 		return model.Token{}, err
 	}
@@ -77,7 +78,7 @@ func (s *DefaultAuthService) Login(email, password string) (model.Token, error) 
 	}, nil
 }
 
-func (s *DefaultAuthService) ValidateToken(accessToken string) (model.Token, bool, error) {
+func (s *DefaultAuthService) ValidateToken(ctx context.Context, accessToken string) (model.Token, bool, error) {
 	claims := &jwt.RegisteredClaims{}
 	parsedToken, err := jwt.ParseWithClaims(accessToken, claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
