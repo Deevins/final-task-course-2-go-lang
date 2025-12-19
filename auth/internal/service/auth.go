@@ -7,6 +7,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/Deevins/final-task-course-2-go-lang/auth/internal/config"
 	"github.com/Deevins/final-task-course-2-go-lang/auth/internal/model"
@@ -32,12 +33,18 @@ func NewAuthService(repo repository.AuthRepository, jwtConfig config.JWTConfig) 
 }
 
 func (s *DefaultAuthService) Register(email, password, name string) (model.User, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return model.User{}, err
+	}
+	now := time.Now().UTC()
 	user := model.User{
-		ID:        uuid.NewString(),
-		Email:     email,
-		Name:      name,
-		Password:  password,
-		CreatedAt: time.Now().UTC(),
+		ID:           uuid.NewString(),
+		Email:        email,
+		Name:         name,
+		PasswordHash: string(hashedPassword),
+		CreatedAt:    now,
+		UpdatedAt:    now,
 	}
 	return s.repo.CreateUser(user)
 }
@@ -47,7 +54,7 @@ func (s *DefaultAuthService) Login(email, password string) (model.Token, error) 
 	if err != nil {
 		return model.Token{}, err
 	}
-	if user.Password != password {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
 		return model.Token{}, ErrInvalidCredentials
 	}
 

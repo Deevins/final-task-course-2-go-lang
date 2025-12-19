@@ -22,9 +22,18 @@ func NewPostgresAuthRepository(db *pgxpool.Pool) *PostgresAuthRepository {
 
 func (r *PostgresAuthRepository) CreateUser(user model.User) (model.User, error) {
 	const query = `
-		INSERT INTO users (id, email, name, password, created_at)
-		VALUES ($1, $2, $3, $4, $5)`
-	_, err := r.db.Exec(context.Background(), query, user.ID, user.Email, user.Name, user.Password, user.CreatedAt)
+		INSERT INTO users (id, email, name, password_hash, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6)`
+	_, err := r.db.Exec(
+		context.Background(),
+		query,
+		user.ID,
+		user.Email,
+		user.Name,
+		user.PasswordHash,
+		user.CreatedAt,
+		user.UpdatedAt,
+	)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
@@ -37,7 +46,7 @@ func (r *PostgresAuthRepository) CreateUser(user model.User) (model.User, error)
 
 func (r *PostgresAuthRepository) GetUserByEmail(email string) (model.User, error) {
 	const query = `
-		SELECT id, email, name, password, created_at
+		SELECT id, email, name, password_hash, created_at, updated_at
 		FROM users
 		WHERE email = $1`
 	var user model.User
@@ -45,8 +54,9 @@ func (r *PostgresAuthRepository) GetUserByEmail(email string) (model.User, error
 		&user.ID,
 		&user.Email,
 		&user.Name,
-		&user.Password,
+		&user.PasswordHash,
 		&user.CreatedAt,
+		&user.UpdatedAt,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -59,7 +69,7 @@ func (r *PostgresAuthRepository) GetUserByEmail(email string) (model.User, error
 
 func (r *PostgresAuthRepository) GetUserByID(id string) (model.User, error) {
 	const query = `
-		SELECT id, email, name, password, created_at
+		SELECT id, email, name, password_hash, created_at, updated_at
 		FROM users
 		WHERE id = $1`
 	var user model.User
@@ -67,8 +77,9 @@ func (r *PostgresAuthRepository) GetUserByID(id string) (model.User, error) {
 		&user.ID,
 		&user.Email,
 		&user.Name,
-		&user.Password,
+		&user.PasswordHash,
 		&user.CreatedAt,
+		&user.UpdatedAt,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
