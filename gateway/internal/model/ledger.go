@@ -91,7 +91,6 @@ type ReportCategory struct {
 type CreateReportRequest struct {
 	Name        string    `json:"name" binding:"required" example:"Январь 2024"`
 	Period      string    `json:"period" binding:"required" example:"2024-01"`
-	GeneratedAt time.Time `json:"generated_at" example:"2024-01-31T23:59:59Z"`
 	Currency    string    `json:"currency" binding:"required" example:"RUB"`
 }
 
@@ -99,7 +98,6 @@ type CreateReportRequest struct {
 type UpdateReportRequest struct {
 	Name        string    `json:"name" binding:"required" example:"Январь 2024"`
 	Period      string    `json:"period" binding:"required" example:"2024-01"`
-	GeneratedAt time.Time `json:"generated_at" example:"2024-01-31T23:59:59Z"`
 	Currency    string    `json:"currency" binding:"required" example:"RUB"`
 }
 
