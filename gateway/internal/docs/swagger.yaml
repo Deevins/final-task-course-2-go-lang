@@ -122,6 +122,145 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorResponse'
+  /api/ledger/transactions/{id}:
+    get:
+      tags:
+        - ledger
+      summary: Получить транзакцию
+      description: Возвращает транзакцию по идентификатору.
+      produces:
+        - application/json
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Transaction'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+    put:
+      tags:
+        - ledger
+      summary: Обновить транзакцию
+      description: Обновляет транзакцию по идентификатору.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: request
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/UpdateTransactionRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Transaction'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+    patch:
+      tags:
+        - ledger
+      summary: Обновить транзакцию
+      description: Обновляет транзакцию по идентификатору.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: request
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/UpdateTransactionRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Transaction'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+    delete:
+      tags:
+        - ledger
+      summary: Удалить транзакцию
+      description: Удаляет транзакцию по идентификатору.
+      produces:
+        - application/json
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/DeleteResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
   /api/ledger/budgets:
     get:
       tags:
@@ -179,6 +318,145 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorResponse'
+  /api/ledger/budgets/{id}:
+    get:
+      tags:
+        - ledger
+      summary: Получить бюджет
+      description: Возвращает бюджет по идентификатору.
+      produces:
+        - application/json
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Budget'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+    put:
+      tags:
+        - ledger
+      summary: Обновить бюджет
+      description: Обновляет бюджет по идентификатору.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: request
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/UpdateBudgetRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Budget'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+    patch:
+      tags:
+        - ledger
+      summary: Обновить бюджет
+      description: Обновляет бюджет по идентификатору.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: request
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/UpdateBudgetRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Budget'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+    delete:
+      tags:
+        - ledger
+      summary: Удалить бюджет
+      description: Удаляет бюджет по идентификатору.
+      produces:
+        - application/json
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/DeleteResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
   /api/ledger/reports:
     get:
       tags:
@@ -224,6 +502,145 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/Report'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  /api/ledger/reports/{id}:
+    get:
+      tags:
+        - ledger
+      summary: Получить отчет
+      description: Возвращает отчет по идентификатору.
+      produces:
+        - application/json
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Report'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+    put:
+      tags:
+        - ledger
+      summary: Обновить отчет
+      description: Обновляет отчет по идентификатору.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: request
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/UpdateReportRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Report'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+    patch:
+      tags:
+        - ledger
+      summary: Обновить отчет
+      description: Обновляет отчет по идентификатору.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: request
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/UpdateReportRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Report'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+    delete:
+      tags:
+        - ledger
+      summary: Удалить отчет
+      description: Удаляет отчет по идентификатору.
+      produces:
+        - application/json
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/DeleteResponse'
         "400":
           description: Bad Request
           schema:
@@ -413,12 +830,43 @@ definitions:
       - currency
       - category
       - occurred_at
+  UpdateTransactionRequest:
+    type: object
+    properties:
+      account_id:
+        type: string
+        example: 22222222-2222-2222-2222-222222222222
+      amount:
+        type: number
+        format: double
+        example: 1250.5
+      currency:
+        type: string
+        example: RUB
+      category:
+        type: string
+        example: Продукты
+      description:
+        type: string
+        example: Покупка в магазине
+      occurred_at:
+        type: string
+        format: date-time
+        example: 2024-01-01T10:00:00Z
+    required:
+      - amount
+      - currency
+      - category
+      - occurred_at
   Budget:
     type: object
     properties:
       id:
         type: string
         example: 11111111-1111-1111-1111-111111111111
+      account_id:
+        type: string
+        example: 22222222-2222-2222-2222-222222222222
       name:
         type: string
         example: Еда
@@ -479,18 +927,52 @@ definitions:
       - period
       - start_date
       - end_date
+  UpdateBudgetRequest:
+    type: object
+    properties:
+      name:
+        type: string
+        example: Еда
+      amount:
+        type: number
+        format: double
+        example: 10000
+      currency:
+        type: string
+        example: RUB
+      period:
+        type: string
+        example: monthly
+      start_date:
+        type: string
+        format: date-time
+        example: 2024-01-01T00:00:00Z
+      end_date:
+        type: string
+        format: date-time
+        example: 2024-01-31T23:59:59Z
+    required:
+      - name
+      - amount
+      - currency
+      - period
+      - start_date
+      - end_date
   Report:
     type: object
     properties:
       id:
         type: string
         example: 11111111-1111-1111-1111-111111111111
+      account_id:
+        type: string
+        example: 22222222-2222-2222-2222-222222222222
       name:
         type: string
         example: Январь 2024
       period:
         type: string
-        example: 2024-01
+        example: 2024-01/2024-01-31
       generated_at:
         type: string
         format: date-time
@@ -514,7 +996,28 @@ definitions:
         example: Январь 2024
       period:
         type: string
-        example: 2024-01
+        example: 2024-01/2024-01-31
+      generated_at:
+        type: string
+        format: date-time
+        example: 2024-01-31T23:59:59Z
+      currency:
+        type: string
+        example: RUB
+    required:
+      - name
+      - period
+      - generated_at
+      - currency
+  UpdateReportRequest:
+    type: object
+    properties:
+      name:
+        type: string
+        example: Январь 2024
+      period:
+        type: string
+        example: 2024-01/2024-01-31
       generated_at:
         type: string
         format: date-time
@@ -550,6 +1053,12 @@ definitions:
       csv_content:
         type: string
         example: account_id,amount,currency,category,description,occurred_at
+  DeleteResponse:
+    type: object
+    properties:
+      deleted:
+        type: boolean
+        example: true
   TransactionsResponse:
     type: object
     properties:
