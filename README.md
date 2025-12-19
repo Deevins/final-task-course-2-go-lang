@@ -33,6 +33,20 @@ make start
 - Postgres: `localhost:5432` (DB `ledger`, пользователь `postgres`, пароль `postgres`)
 - Redis: `localhost:6379`
 
+## Миграции (Auth + Ledger)
+
+Запуск миграций Auth через Docker Compose:
+
+```bash
+docker compose run --rm auth sh -c "go install github.com/pressly/goose/v3/cmd/goose@latest && goose -dir /app/auth/migrations postgres \"postgres://postgres:postgres@postgres:5432/ledger?sslmode=disable\" up"
+```
+
+Запуск миграций Ledger через Docker Compose:
+
+```bash
+docker compose run --rm ledger sh -c "go install github.com/pressly/goose/v3/cmd/goose@latest && POSTGRES_DSN=postgres://postgres:postgres@postgres:5432/ledger?sslmode=disable /app/ledger/scripts/migrate.sh"
+```
+
 ## Авторизация
 
 Используйте Bearer JWT токен в заголовке `Authorization` для защищенных маршрутов Ledger.
@@ -95,73 +109,4 @@ curl -X POST http://localhost:8081/api/ledger/transactions \
     "description": "Покупка в магазине",
     "occurred_at": "2024-01-01T10:00:00Z"
   }'
-```
-
-#### GET `/api/ledger/budgets`
-Список бюджетов.
-
-```bash
-curl -H "Authorization: Bearer <jwt>" \
-  http://localhost:8081/api/ledger/budgets
-```
-
-#### POST `/api/ledger/budgets`
-Создание бюджета.
-
-```bash
-curl -X POST http://localhost:8081/api/ledger/budgets \
-  -H "Authorization: Bearer <jwt>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Еда",
-    "amount": 10000,
-    "currency": "RUB",
-    "period": "monthly",
-    "start_date": "2024-01-01T00:00:00Z",
-    "end_date": "2024-01-31T23:59:59Z"
-  }'
-```
-
-#### GET `/api/ledger/reports`
-Список отчетов.
-
-```bash
-curl -H "Authorization: Bearer <jwt>" \
-  http://localhost:8081/api/ledger/reports
-```
-
-#### POST `/api/ledger/reports`
-Создание отчета.
-
-```bash
-curl -X POST http://localhost:8081/api/ledger/reports \
-  -H "Authorization: Bearer <jwt>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Январь 2024",
-    "period": "2024-01/2024-01-31",
-    "generated_at": "2024-01-31T23:59:59Z",
-    "currency": "RUB"
-  }'
-```
-
-#### POST `/api/ledger/import`
-Импорт транзакций из CSV.
-
-```bash
-curl -X POST http://localhost:8081/api/ledger/import \
-  -H "Authorization: Bearer <jwt>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "csv_content": "account_id,amount,currency,category,description,occurred_at\n2222,1000,RUB,Продукты,Покупка,2024-01-01T10:00:00Z",
-    "has_header": true
-  }'
-```
-
-#### GET `/api/ledger/export`
-Экспорт транзакций в CSV.
-
-```bash
-curl -H "Authorization: Bearer <jwt>" \
-  http://localhost:8081/api/ledger/export
 ```
