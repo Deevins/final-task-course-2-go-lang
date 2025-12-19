@@ -1,15 +1,9 @@
 package storage
 
 import (
-	"errors"
 	"sync"
 
 	"github.com/Deevins/final-task-course-2-go-lang/auth/internal/model"
-)
-
-var (
-	ErrNotFound  = errors.New("not found")
-	ErrDuplicate = errors.New("duplicate")
 )
 
 type InMemoryAuthStorage struct {
