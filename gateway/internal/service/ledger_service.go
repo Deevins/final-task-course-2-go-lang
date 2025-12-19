@@ -25,7 +25,7 @@ type LedgerGatewayService interface {
 	GetReport(ctx context.Context, accountID, id string) (*model.Report, error)
 	UpdateReport(ctx context.Context, accountID, id string, req model.UpdateReportRequest) (*model.Report, error)
 	DeleteReport(ctx context.Context, accountID, id string) (bool, error)
-	ImportTransactionsCSV(ctx context.Context, csvContent []byte, hasHeader bool) (int32, error)
+	ImportTransactionsCSV(ctx context.Context, accountID string, csvContent []byte, hasHeader bool) (int32, error)
 	ExportTransactionsCSV(ctx context.Context, accountID string) ([]byte, error)
 }
 
@@ -217,8 +217,9 @@ func (s *ledgerGatewayService) DeleteReport(ctx context.Context, accountID, id s
 	return resp.GetDeleted(), nil
 }
 
-func (s *ledgerGatewayService) ImportTransactionsCSV(ctx context.Context, csvContent []byte, hasHeader bool) (int32, error) {
+func (s *ledgerGatewayService) ImportTransactionsCSV(ctx context.Context, accountID string, csvContent []byte, hasHeader bool) (int32, error) {
 	resp, err := s.client.ImportTransactionsCsv(ctx, &ledgerv1.ImportTransactionsCsvRequest{
+		AccountId:  accountID,
 		CsvContent: csvContent,
 		HasHeader:  hasHeader,
 	})

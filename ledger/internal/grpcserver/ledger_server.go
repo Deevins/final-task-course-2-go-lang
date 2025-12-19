@@ -289,11 +289,14 @@ func (s *LedgerServer) ListReports(ctx context.Context, req *pb.ListReportsReque
 }
 
 func (s *LedgerServer) ImportTransactionsCsv(ctx context.Context, req *pb.ImportTransactionsCsvRequest) (*pb.ImportTransactionsCsvResponse, error) {
+	if req.GetAccountId() == "" {
+		return nil, status.Error(codes.InvalidArgument, "account_id is required")
+	}
 	if len(req.GetCsvContent()) == 0 {
 		return nil, status.Error(codes.InvalidArgument, "csv_content is required")
 	}
 
-	count, err := s.ledgerService.ImportTransactionsCSV(req.GetCsvContent(), req.GetHasHeader())
+	count, err := s.ledgerService.ImportTransactionsCSV(req.GetAccountId(), req.GetCsvContent(), req.GetHasHeader())
 	if err != nil {
 		if service.IsValidationError(err) {
 			return nil, status.Errorf(codes.InvalidArgument, "import csv: %v", err)

@@ -137,11 +137,14 @@ func (s *ValidationService) ListReports(accountID string) []model.Report {
 	return s.next.ListReports(accountID)
 }
 
-func (s *ValidationService) ImportTransactionsCSV(csvContent []byte, hasHeader bool) (int, error) {
+func (s *ValidationService) ImportTransactionsCSV(accountID string, csvContent []byte, hasHeader bool) (int, error) {
+	if accountID == "" {
+		return 0, fmt.Errorf("%w: account id is required", ErrValidation)
+	}
 	if len(csvContent) == 0 {
 		return 0, fmt.Errorf("%w: csv content is required", ErrValidation)
 	}
-	return s.next.ImportTransactionsCSV(csvContent, hasHeader)
+	return s.next.ImportTransactionsCSV(accountID, csvContent, hasHeader)
 }
 
 func (s *ValidationService) ExportTransactionsCSV(accountID string) ([]byte, error) {
