@@ -31,6 +31,12 @@ func (s *LedgerServer) CreateTransaction(ctx context.Context, req *pb.CreateTran
 
 	created, err := s.ledgerService.CreateTransaction(toModelTransaction(req.GetTransaction()))
 	if err != nil {
+		if service.IsValidationError(err) {
+			return nil, status.Errorf(codes.InvalidArgument, "create transaction: %v", err)
+		}
+		if service.IsBudgetExceeded(err) {
+			return nil, status.Errorf(codes.FailedPrecondition, "create transaction: %v", err)
+		}
 		return nil, status.Errorf(codes.Internal, "create transaction: %v", err)
 	}
 
@@ -63,6 +69,9 @@ func (s *LedgerServer) UpdateTransaction(ctx context.Context, req *pb.UpdateTran
 		if service.IsNotFound(err) {
 			return nil, status.Error(codes.NotFound, "transaction not found")
 		}
+		if service.IsValidationError(err) {
+			return nil, status.Errorf(codes.InvalidArgument, "update transaction: %v", err)
+		}
 		return nil, status.Errorf(codes.Internal, "update transaction: %v", err)
 	}
 
@@ -77,6 +86,9 @@ func (s *LedgerServer) DeleteTransaction(ctx context.Context, req *pb.DeleteTran
 	if err := s.ledgerService.DeleteTransaction(req.GetId()); err != nil {
 		if service.IsNotFound(err) {
 			return &pb.DeleteResponse{Deleted: false}, nil
+		}
+		if service.IsValidationError(err) {
+			return nil, status.Errorf(codes.InvalidArgument, "delete transaction: %v", err)
 		}
 		return nil, status.Errorf(codes.Internal, "delete transaction: %v", err)
 	}
@@ -101,6 +113,9 @@ func (s *LedgerServer) CreateBudget(ctx context.Context, req *pb.CreateBudgetReq
 
 	created, err := s.ledgerService.CreateBudget(toModelBudget(req.GetBudget()))
 	if err != nil {
+		if service.IsValidationError(err) {
+			return nil, status.Errorf(codes.InvalidArgument, "create budget: %v", err)
+		}
 		return nil, status.Errorf(codes.Internal, "create budget: %v", err)
 	}
 
@@ -133,6 +148,9 @@ func (s *LedgerServer) UpdateBudget(ctx context.Context, req *pb.UpdateBudgetReq
 		if service.IsNotFound(err) {
 			return nil, status.Error(codes.NotFound, "budget not found")
 		}
+		if service.IsValidationError(err) {
+			return nil, status.Errorf(codes.InvalidArgument, "update budget: %v", err)
+		}
 		return nil, status.Errorf(codes.Internal, "update budget: %v", err)
 	}
 
@@ -147,6 +165,9 @@ func (s *LedgerServer) DeleteBudget(ctx context.Context, req *pb.DeleteBudgetReq
 	if err := s.ledgerService.DeleteBudget(req.GetId()); err != nil {
 		if service.IsNotFound(err) {
 			return &pb.DeleteResponse{Deleted: false}, nil
+		}
+		if service.IsValidationError(err) {
+			return nil, status.Errorf(codes.InvalidArgument, "delete budget: %v", err)
 		}
 		return nil, status.Errorf(codes.Internal, "delete budget: %v", err)
 	}
@@ -171,6 +192,9 @@ func (s *LedgerServer) CreateReport(ctx context.Context, req *pb.CreateReportReq
 
 	created, err := s.ledgerService.CreateReport(toModelReport(req.GetReport()))
 	if err != nil {
+		if service.IsValidationError(err) {
+			return nil, status.Errorf(codes.InvalidArgument, "create report: %v", err)
+		}
 		return nil, status.Errorf(codes.Internal, "create report: %v", err)
 	}
 
@@ -203,6 +227,9 @@ func (s *LedgerServer) UpdateReport(ctx context.Context, req *pb.UpdateReportReq
 		if service.IsNotFound(err) {
 			return nil, status.Error(codes.NotFound, "report not found")
 		}
+		if service.IsValidationError(err) {
+			return nil, status.Errorf(codes.InvalidArgument, "update report: %v", err)
+		}
 		return nil, status.Errorf(codes.Internal, "update report: %v", err)
 	}
 
@@ -217,6 +244,9 @@ func (s *LedgerServer) DeleteReport(ctx context.Context, req *pb.DeleteReportReq
 	if err := s.ledgerService.DeleteReport(req.GetId()); err != nil {
 		if service.IsNotFound(err) {
 			return &pb.DeleteResponse{Deleted: false}, nil
+		}
+		if service.IsValidationError(err) {
+			return nil, status.Errorf(codes.InvalidArgument, "delete report: %v", err)
 		}
 		return nil, status.Errorf(codes.Internal, "delete report: %v", err)
 	}
@@ -241,6 +271,9 @@ func (s *LedgerServer) ImportTransactionsCsv(ctx context.Context, req *pb.Import
 
 	count, err := s.ledgerService.ImportTransactionsCSV(req.GetCsvContent(), req.GetHasHeader())
 	if err != nil {
+		if service.IsValidationError(err) {
+			return nil, status.Errorf(codes.InvalidArgument, "import csv: %v", err)
+		}
 		return nil, status.Errorf(codes.Internal, "import csv: %v", err)
 	}
 

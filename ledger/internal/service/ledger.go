@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"encoding/csv"
 	"fmt"
+	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -64,7 +66,10 @@ func (s *DefaultLedgerService) CreateTransaction(tx model.Transaction) (model.Tr
 	}
 	tx.CreatedAt = now
 	tx.UpdatedAt = now
-	return s.repo.CreateTransaction(tx), nil
+	if err := s.ensureBudgetAvailable(tx); err != nil {
+		return model.Transaction{}, err
+	}
+	return s.repo.CreateTransaction(tx)
 }
 
 func (s *DefaultLedgerService) GetTransaction(id string) (model.Transaction, error) {
@@ -109,7 +114,7 @@ func (s *DefaultLedgerService) CreateBudget(budget model.Budget) (model.Budget, 
 	}
 	budget.CreatedAt = now
 	budget.UpdatedAt = now
-	return s.repo.CreateBudget(budget), nil
+	return s.repo.CreateBudget(budget)
 }
 
 func (s *DefaultLedgerService) GetBudget(id string) (model.Budget, error) {
@@ -148,7 +153,18 @@ func (s *DefaultLedgerService) CreateReport(report model.Report) (model.Report, 
 	if report.GeneratedAt.IsZero() {
 		report.GeneratedAt = now
 	}
-	return s.repo.CreateReport(report), nil
+	start, end, err := parsePeriod(report.Period)
+	if err != nil {
+		return model.Report{}, err
+	}
+	transactions := s.repo.ListTransactions()
+	budgets := s.repo.ListBudgets()
+	reportTotals := buildReportSummary(transactions, budgets, start, end, report.Currency)
+	report.TotalIncome = reportTotals.TotalIncome
+	report.TotalExpense = reportTotals.TotalExpense
+	report.Currency = reportTotals.Currency
+	report.Categories = reportTotals.Categories
+	return s.repo.CreateReport(report)
 }
 
 func (s *DefaultLedgerService) GetReport(id string) (model.Report, error) {
@@ -156,13 +172,30 @@ func (s *DefaultLedgerService) GetReport(id string) (model.Report, error) {
 }
 
 func (s *DefaultLedgerService) UpdateReport(report model.Report) (model.Report, error) {
-	_, err := s.repo.GetReport(report.ID)
+	current, err := s.repo.GetReport(report.ID)
 	if err != nil {
 		return model.Report{}, err
 	}
 	if report.GeneratedAt.IsZero() {
 		report.GeneratedAt = time.Now().UTC()
 	}
+	if report.Period == "" {
+		report.Period = current.Period
+	}
+	if report.Currency == "" {
+		report.Currency = current.Currency
+	}
+	start, end, err := parsePeriod(report.Period)
+	if err != nil {
+		return model.Report{}, err
+	}
+	transactions := s.repo.ListTransactions()
+	budgets := s.repo.ListBudgets()
+	reportTotals := buildReportSummary(transactions, budgets, start, end, report.Currency)
+	report.TotalIncome = reportTotals.TotalIncome
+	report.TotalExpense = reportTotals.TotalExpense
+	report.Currency = reportTotals.Currency
+	report.Categories = reportTotals.Categories
 	return s.repo.UpdateReport(report)
 }
 
@@ -193,23 +226,18 @@ func (s *DefaultLedgerService) ImportTransactionsCSV(csvContent []byte, hasHeade
 			return count, fmt.Errorf("row %d: expected 6 columns", i+1)
 		}
 
-		amount, err := strconv.ParseFloat(row[1], 64)
+		record, err := parseCSVRecord(row)
 		if err != nil {
-			return count, fmt.Errorf("row %d: parse amount: %w", i+1, err)
-		}
-
-		occurredAt, err := time.Parse(time.RFC3339, row[5])
-		if err != nil {
-			return count, fmt.Errorf("row %d: parse occurred_at: %w", i+1, err)
+			return count, fmt.Errorf("row %d: %w", i+1, err)
 		}
 
 		_, err = s.CreateTransaction(model.Transaction{
-			AccountID:   row[0],
-			Amount:      amount,
-			Currency:    row[2],
-			Category:    row[3],
-			Description: row[4],
-			OccurredAt:  occurredAt,
+			AccountID:   record.AccountID,
+			Amount:      record.Amount,
+			Currency:    record.Currency,
+			Category:    record.Category,
+			Description: record.Description,
+			OccurredAt:  record.OccurredAt,
 		})
 		if err != nil {
 			return count, err
@@ -230,14 +258,7 @@ func (s *DefaultLedgerService) ExportTransactionsCSV(accountID string) ([]byte, 
 	}
 
 	for _, tx := range transactions {
-		record := []string{
-			tx.AccountID,
-			strconv.FormatFloat(tx.Amount, 'f', -1, 64),
-			tx.Currency,
-			tx.Category,
-			tx.Description,
-			tx.OccurredAt.Format(time.RFC3339),
-		}
+		record := csvRecordFromTransaction(tx)
 		if err := writer.Write(record); err != nil {
 			return nil, fmt.Errorf("write record: %w", err)
 		}
@@ -253,4 +274,216 @@ func (s *DefaultLedgerService) ExportTransactionsCSV(accountID string) ([]byte, 
 
 func IsNotFound(err error) bool {
 	return err == storage.ErrNotFound
+}
+
+func (s *DefaultLedgerService) ensureBudgetAvailable(tx model.Transaction) error {
+	if tx.Amount >= 0 {
+		return nil
+	}
+	budgets := s.repo.ListBudgets()
+	if len(budgets) == 0 {
+		return nil
+	}
+	expense := -tx.Amount
+	transactions := s.repo.ListTransactions()
+	for _, budget := range budgets {
+		if budget.Currency != tx.Currency {
+			continue
+		}
+		if budget.Name != tx.Category {
+			continue
+		}
+		if !withinPeriod(tx.OccurredAt, budget.StartDate, budget.EndDate) {
+			continue
+		}
+		total := 0.0
+		for _, existing := range transactions {
+			if existing.Amount >= 0 {
+				continue
+			}
+			if existing.Currency != tx.Currency || existing.Category != tx.Category {
+				continue
+			}
+			if !withinPeriod(existing.OccurredAt, budget.StartDate, budget.EndDate) {
+				continue
+			}
+			total += -existing.Amount
+		}
+		if total+expense > budget.Amount {
+			return fmt.Errorf("%w: %s budget exceeded", ErrBudgetExceeded, budget.Name)
+		}
+	}
+	return nil
+}
+
+type reportSummary struct {
+	TotalIncome  float64
+	TotalExpense float64
+	Currency     string
+	Categories   []model.ReportCategory
+}
+
+func buildReportSummary(transactions []model.Transaction, budgets []model.Budget, start, end time.Time, currency string) reportSummary {
+	categoryTotals := map[string]float64{}
+	totalIncome := 0.0
+	totalExpense := 0.0
+	resolvedCurrency := currency
+
+	for _, tx := range transactions {
+		if tx.OccurredAt.Before(start) || tx.OccurredAt.After(end) {
+			continue
+		}
+		if currency != "" && tx.Currency != currency {
+			continue
+		}
+		if resolvedCurrency == "" {
+			resolvedCurrency = tx.Currency
+		}
+		if tx.Amount >= 0 {
+			totalIncome += tx.Amount
+			continue
+		}
+		expense := -tx.Amount
+		totalExpense += expense
+		categoryTotals[tx.Category] += expense
+	}
+
+	categories := make([]string, 0, len(categoryTotals))
+	for category := range categoryTotals {
+		categories = append(categories, category)
+	}
+	sort.Strings(categories)
+
+	results := make([]model.ReportCategory, 0, len(categories))
+	for _, category := range categories {
+		total := categoryTotals[category]
+		budgetAmount := findBudgetAmount(budgets, category, resolvedCurrency, start, end)
+		percent := 0.0
+		if budgetAmount > 0 {
+			percent = (total / budgetAmount) * 100
+		}
+		results = append(results, model.ReportCategory{
+			Category:           category,
+			TotalExpense:       total,
+			BudgetAmount:       budgetAmount,
+			BudgetUsagePercent: percent,
+		})
+	}
+
+	return reportSummary{
+		TotalIncome:  totalIncome,
+		TotalExpense: totalExpense,
+		Currency:     resolvedCurrency,
+		Categories:   results,
+	}
+}
+
+func findBudgetAmount(budgets []model.Budget, category, currency string, start, end time.Time) float64 {
+	for _, budget := range budgets {
+		if budget.Name != category {
+			continue
+		}
+		if currency != "" && budget.Currency != currency {
+			continue
+		}
+		if !periodsOverlap(budget.StartDate, budget.EndDate, start, end) {
+			continue
+		}
+		return budget.Amount
+	}
+	return 0
+}
+
+func periodsOverlap(startA, endA, startB, endB time.Time) bool {
+	if startA.IsZero() || endA.IsZero() {
+		return true
+	}
+	if endB.Before(startA) || endA.Before(startB) {
+		return false
+	}
+	return true
+}
+
+func withinPeriod(target, start, end time.Time) bool {
+	if start.IsZero() && end.IsZero() {
+		return true
+	}
+	if !start.IsZero() && target.Before(start) {
+		return false
+	}
+	if !end.IsZero() && target.After(end) {
+		return false
+	}
+	return true
+}
+
+func parsePeriod(value string) (time.Time, time.Time, error) {
+	parts := strings.Split(value, "/")
+	if len(parts) != 2 {
+		return time.Time{}, time.Time{}, fmt.Errorf("%w: period must be in start/end format", ErrValidation)
+	}
+	start, err := parseTimestamp(parts[0])
+	if err != nil {
+		return time.Time{}, time.Time{}, fmt.Errorf("%w: invalid period start", ErrValidation)
+	}
+	end, err := parseTimestamp(parts[1])
+	if err != nil {
+		return time.Time{}, time.Time{}, fmt.Errorf("%w: invalid period end", ErrValidation)
+	}
+	if end.Before(start) {
+		return time.Time{}, time.Time{}, fmt.Errorf("%w: period end before start", ErrValidation)
+	}
+	return start, end, nil
+}
+
+func parseTimestamp(value string) (time.Time, error) {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return time.Time{}, fmt.Errorf("empty timestamp")
+	}
+	parsed, err := time.Parse(time.RFC3339, value)
+	if err == nil {
+		return parsed, nil
+	}
+	return time.Parse("2006-01-02", value)
+}
+
+func parseCSVRecord(row []string) (model.TransactionCSVRow, error) {
+	amount, err := strconv.ParseFloat(row[1], 64)
+	if err != nil {
+		return model.TransactionCSVRow{}, fmt.Errorf("parse amount: %w", err)
+	}
+
+	occurredAt, err := time.Parse(time.RFC3339, row[5])
+	if err != nil {
+		return model.TransactionCSVRow{}, fmt.Errorf("parse occurred_at: %w", err)
+	}
+
+	return model.TransactionCSVRow{
+		AccountID:   row[0],
+		Amount:      amount,
+		Currency:    row[2],
+		Category:    row[3],
+		Description: row[4],
+		OccurredAt:  occurredAt,
+	}, nil
+}
+
+func csvRecordFromTransaction(tx model.Transaction) []string {
+	record := model.TransactionCSVRow{
+		AccountID:   tx.AccountID,
+		Amount:      tx.Amount,
+		Currency:    tx.Currency,
+		Category:    tx.Category,
+		Description: tx.Description,
+		OccurredAt:  tx.OccurredAt,
+	}
+	return []string{
+		record.AccountID,
+		strconv.FormatFloat(record.Amount, 'f', -1, 64),
+		record.Currency,
+		record.Category,
+		record.Description,
+		record.OccurredAt.Format(time.RFC3339),
+	}
 }
