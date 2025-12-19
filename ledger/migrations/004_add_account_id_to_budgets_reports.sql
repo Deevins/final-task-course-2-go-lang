@@ -1,6 +1,6 @@
 -- +goose Up
-ALTER TABLE budgets ADD COLUMN IF NOT EXISTS account_id TEXT NOT NULL;
-ALTER TABLE reports ADD COLUMN IF NOT EXISTS account_id TEXT NOT NULL;
+ALTER TABLE budgets ADD COLUMN IF NOT EXISTS account_id TEXT NOT NULL default '';
+ALTER TABLE reports ADD COLUMN IF NOT EXISTS account_id TEXT NOT NULL default '';
 
 CREATE INDEX IF NOT EXISTS budgets_account_id_idx ON budgets (account_id);
 CREATE INDEX IF NOT EXISTS reports_account_id_idx ON reports (account_id);

@@ -1,10 +1,6 @@
 -- +goose Up
 ALTER TABLE budgets ADD COLUMN IF NOT EXISTS month TIMESTAMPTZ;
 
-UPDATE budgets
-SET month = date_trunc('month', start_date)
-WHERE month IS NULL;
-
 ALTER TABLE budgets ALTER COLUMN month SET NOT NULL;
 ALTER TABLE budgets DROP COLUMN IF EXISTS start_date;
 ALTER TABLE budgets DROP COLUMN IF EXISTS end_date;
