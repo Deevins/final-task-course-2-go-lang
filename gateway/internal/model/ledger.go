@@ -72,7 +72,7 @@ type UpdateBudgetRequest struct {
 type Report struct {
 	ID           string    `json:"id" example:"11111111-1111-1111-1111-111111111111"`
 	Name         string    `json:"name" example:"Январь 2024"`
-	Period       string    `json:"period" example:"2024-01"`
+	Period       string    `json:"period" example:"2024-01/2024-01-31"`
 	GeneratedAt  time.Time `json:"generated_at" example:"2024-01-31T23:59:59Z"`
 	TotalIncome  float64   `json:"total_income" example:"50000"`
 	TotalExpense float64   `json:"total_expense" example:"30000"`
@@ -82,7 +82,7 @@ type Report struct {
 // CreateReportRequest описывает запрос на создание отчета.
 type CreateReportRequest struct {
 	Name        string    `json:"name" binding:"required" example:"Январь 2024"`
-	Period      string    `json:"period" binding:"required" example:"2024-01"`
+	Period      string    `json:"period" binding:"required" example:"2024-01/2024-01-31"`
 	GeneratedAt time.Time `json:"generated_at" binding:"required" example:"2024-01-31T23:59:59Z"`
 	Currency    string    `json:"currency" binding:"required" example:"RUB"`
 }
@@ -90,7 +90,7 @@ type CreateReportRequest struct {
 // UpdateReportRequest описывает запрос на обновление отчета.
 type UpdateReportRequest struct {
 	Name        string    `json:"name" binding:"required" example:"Январь 2024"`
-	Period      string    `json:"period" binding:"required" example:"2024-01"`
+	Period      string    `json:"period" binding:"required" example:"2024-01/2024-01-31"`
 	GeneratedAt time.Time `json:"generated_at" binding:"required" example:"2024-01-31T23:59:59Z"`
 	Currency    string    `json:"currency" binding:"required" example:"RUB"`
 }

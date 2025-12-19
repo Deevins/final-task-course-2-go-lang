@@ -139,7 +139,7 @@ curl -X POST http://localhost:8081/api/ledger/reports \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Январь 2024",
-    "period": "2024-01",
+    "period": "2024-01/2024-01-31",
     "generated_at": "2024-01-31T23:59:59Z",
     "currency": "RUB"
   }'
