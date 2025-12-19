@@ -205,6 +205,7 @@ curl -X POST http://localhost:8081/api/auth/signin \
   - `PATCH /api/ledger/budgets/{id}`
   - `DELETE /api/ledger/budgets/{id}`
   - Бюджет задается только на месяц (поле `month` — дата первого дня месяца в формате RFC3339), а категория определяется полем `name`.
+    Оно должно совпадать с `category` из транзакций (категории задаются свободным текстом).
 - Отчеты:
   - `GET /api/ledger/reports`
   - `POST /api/ledger/reports`
@@ -242,6 +243,8 @@ curl -X POST http://localhost:8081/api/ledger/transactions \
 
 Важно: тип операции определяется знаком `amount`.
 Положительное значение — это доход, отрицательное — расход.
+Категория задается строкой в поле `category` у транзакции — отдельного справочника
+категорий нет.
 
 Период отчета (`period`) поддерживает оба формата:
 
