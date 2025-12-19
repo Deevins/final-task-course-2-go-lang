@@ -2,6 +2,7 @@ package service
 
 import (
 	"bytes"
+	"context"
 	"encoding/csv"
 	"fmt"
 	"sort"
@@ -49,11 +50,12 @@ type LedgerService interface {
 }
 
 type DefaultLedgerService struct {
-	repo repository.LedgerRepository
+	repo  repository.LedgerRepository
+	cache *storage.ReportCache
 }
 
-func NewLedgerService(repo repository.LedgerRepository) *DefaultLedgerService {
-	return &DefaultLedgerService{repo: repo}
+func NewLedgerService(repo repository.LedgerRepository, cache *storage.ReportCache) *DefaultLedgerService {
+	return &DefaultLedgerService{repo: repo, cache: cache}
 }
 
 func (s *DefaultLedgerService) CreateTransaction(tx model.Transaction) (model.Transaction, error) {
@@ -164,11 +166,30 @@ func (s *DefaultLedgerService) CreateReport(report model.Report) (model.Report, 
 	report.TotalExpense = reportTotals.TotalExpense
 	report.Currency = reportTotals.Currency
 	report.Categories = reportTotals.Categories
-	return s.repo.CreateReport(report)
+	created, err := s.repo.CreateReport(report)
+	if err != nil {
+		return model.Report{}, err
+	}
+	s.cacheReport(created)
+	return created, nil
 }
 
 func (s *DefaultLedgerService) GetReport(id string) (model.Report, error) {
-	return s.repo.GetReport(id)
+	if s.cache != nil {
+		cached, err := s.cache.GetReport(context.Background(), id)
+		if err == nil {
+			return cached, nil
+		}
+		if err != storage.ErrNotFound {
+			return model.Report{}, err
+		}
+	}
+	report, err := s.repo.GetReport(id)
+	if err != nil {
+		return model.Report{}, err
+	}
+	s.cacheReport(report)
+	return report, nil
 }
 
 func (s *DefaultLedgerService) UpdateReport(report model.Report) (model.Report, error) {
@@ -196,11 +217,20 @@ func (s *DefaultLedgerService) UpdateReport(report model.Report) (model.Report, 
 	report.TotalExpense = reportTotals.TotalExpense
 	report.Currency = reportTotals.Currency
 	report.Categories = reportTotals.Categories
-	return s.repo.UpdateReport(report)
+	updated, err := s.repo.UpdateReport(report)
+	if err != nil {
+		return model.Report{}, err
+	}
+	s.cacheReport(updated)
+	return updated, nil
 }
 
 func (s *DefaultLedgerService) DeleteReport(id string) error {
-	return s.repo.DeleteReport(id)
+	if err := s.repo.DeleteReport(id); err != nil {
+		return err
+	}
+	s.invalidateReportCache(id)
+	return nil
 }
 
 func (s *DefaultLedgerService) ListReports() []model.Report {
@@ -314,6 +344,20 @@ func (s *DefaultLedgerService) ensureBudgetAvailable(tx model.Transaction) error
 		}
 	}
 	return nil
+}
+
+func (s *DefaultLedgerService) cacheReport(report model.Report) {
+	if s.cache == nil {
+		return
+	}
+	_ = s.cache.SetReport(context.Background(), report)
+}
+
+func (s *DefaultLedgerService) invalidateReportCache(id string) {
+	if s.cache == nil {
+		return
+	}
+	_ = s.cache.DeleteReport(context.Background(), id)
 }
 
 type reportSummary struct {
