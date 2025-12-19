@@ -11,3 +11,5 @@ type AuthRepository interface {
 	GetUserByEmail(ctx context.Context, email string) (model.User, error)
 	GetUserByID(ctx context.Context, id string) (model.User, error)
 }
+
+//go:generate go run github.com/gojuno/minimock/v3/cmd/minimock -i AuthRepository -o auth_repository_minimock.go
