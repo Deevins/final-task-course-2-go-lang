@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "description": "HTTP API gateway for auth, ledger, and budget services.",
+    "description": "HTTP API gateway for auth and ledger services.",
     "title": "Gateway API",
     "version": "1.0"
   },
@@ -197,70 +197,6 @@
           "500": {"description": "Internal Server Error", "schema": {"$ref": "#/definitions/ErrorResponse"}}
         }
       }
-    },
-    "/api/budget/export": {
-      "post": {
-        "tags": ["budget"],
-        "summary": "Экспортировать бюджет в Google Sheets",
-        "description": "Записывает строки бюджета в Google Sheets.",
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
-        "parameters": [
-          {
-            "name": "request",
-            "in": "body",
-            "required": true,
-            "schema": {"$ref": "#/definitions/ExportSimpleRequest"}
-          }
-        ],
-        "responses": {
-          "200": {"description": "OK", "schema": {"$ref": "#/definitions/ExportSimpleResponse"}},
-          "400": {"description": "Bad Request", "schema": {"$ref": "#/definitions/ErrorResponse"}},
-          "500": {"description": "Internal Server Error", "schema": {"$ref": "#/definitions/ErrorResponse"}}
-        }
-      }
-    },
-    "/api/budget/import": {
-      "get": {
-        "tags": ["budget"],
-        "summary": "Импортировать бюджет из Google Sheets",
-        "description": "Возвращает строки бюджета из Google Sheets по идентификатору таблицы.",
-        "produces": ["application/json"],
-        "parameters": [
-          {
-            "name": "spreadsheet_id",
-            "in": "query",
-            "required": true,
-            "type": "string",
-            "description": "ID таблицы Google Sheets"
-          },
-          {
-            "name": "sheet_name",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "description": "Имя листа",
-            "default": "Report"
-          }
-        ],
-        "responses": {
-          "200": {"description": "OK", "schema": {"$ref": "#/definitions/BudgetRowsResponse"}},
-          "400": {"description": "Bad Request", "schema": {"$ref": "#/definitions/ErrorResponse"}},
-          "500": {"description": "Internal Server Error", "schema": {"$ref": "#/definitions/ErrorResponse"}}
-        }
-      }
-    },
-    "/api/budget/download": {
-      "get": {
-        "tags": ["budget"],
-        "summary": "Скачать бюджет по умолчанию",
-        "description": "Возвращает строки бюджета по умолчанию.",
-        "produces": ["application/json"],
-        "responses": {
-          "200": {"description": "OK", "schema": {"$ref": "#/definitions/BudgetRowsResponse"}},
-          "500": {"description": "Internal Server Error", "schema": {"$ref": "#/definitions/ErrorResponse"}}
-        }
-      }
     }
   },
   "securityDefinitions": {
@@ -402,31 +338,6 @@
         "csv_content": {"type": "string", "example": "account_id,amount,currency,category,description,occurred_at"}
       }
     },
-    "SimpleRow": {
-      "type": "object",
-      "properties": {
-        "category": {"type": "string", "example": "Продукты"},
-        "amount": {"type": "number", "format": "double", "example": 1250.5}
-      }
-    },
-    "ExportSimpleRequest": {
-      "type": "object",
-      "properties": {
-        "spreadsheet_id": {"type": "string", "example": "1AbCDefGhijk"},
-        "sheet_name": {"type": "string", "example": "Report"},
-        "clear": {"type": "boolean"},
-        "rows": {"type": "array", "items": {"$ref": "#/definitions/SimpleRow"}}
-      },
-      "required": ["spreadsheet_id", "sheet_name", "rows"]
-    },
-    "ExportSimpleResponse": {
-      "type": "object",
-      "properties": {
-        "written_range": {"type": "string", "example": "Report!A1:B4"},
-        "rows": {"type": "integer", "example": 3},
-        "spreadsheet_url": {"type": "string", "example": "https://docs.google.com/spreadsheets/d/<ID>/edit"}
-      }
-    },
     "TransactionsResponse": {
       "type": "object",
       "properties": {
@@ -443,12 +354,6 @@
       "type": "object",
       "properties": {
         "reports": {"type": "array", "items": {"$ref": "#/definitions/Report"}}
-      }
-    },
-    "BudgetRowsResponse": {
-      "type": "object",
-      "properties": {
-        "rows": {"type": "array", "items": {"$ref": "#/definitions/SimpleRow"}}
       }
     }
   }

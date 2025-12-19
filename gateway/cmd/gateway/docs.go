@@ -1,6 +1,6 @@
 // @title Gateway API
 // @version 1.0
-// @description HTTP API gateway for auth, ledger, and budget services.
+// @description HTTP API gateway for auth and ledger services.
 // @BasePath /
 // @schemes http
 // @securityDefinitions.apikey BearerAuth
