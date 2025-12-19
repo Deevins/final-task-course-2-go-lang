@@ -3,6 +3,7 @@ syntax = "proto3";
 package ledger.v1;
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
 
 option go_package = "github.com/Deevins/final-task-course-2-go-lang/ledger/internal/pb/ledger/v1";
 
@@ -39,6 +40,7 @@ message Report {
   double total_income = 6;
   double total_expense = 7;
   string currency = 8;
+  repeated ReportCategory categories = 9;
 }
 
 message CreateTransactionRequest {
@@ -158,6 +160,13 @@ message ExportTransactionsCsvRequest {
 
 message ExportTransactionsCsvResponse {
   bytes csv_content = 1;
+}
+
+message ReportCategory {
+  string category = 1;
+  double total_expense = 2;
+  double budget_amount = 3;
+  google.protobuf.DoubleValue budget_usage_percent = 4;
 }
 
 service LedgerService {
