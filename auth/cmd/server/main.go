@@ -35,8 +35,16 @@ func main() {
 		log.Fatalf("load JWT config: %v", err)
 	}
 
-	store := storage.NewInMemoryAuthStorage()
-	repo := repository.NewInMemoryAuthRepository(store)
+	dsn := os.Getenv("AUTH_POSTGRES_DSN")
+	db, err := storage.NewPostgresPool(ctx, dsn)
+	if err != nil {
+		log.Fatalf("connect postgres: %v", err)
+	}
+	defer func() {
+		db.Close()
+	}()
+
+	repo := repository.NewPostgresAuthRepository(db)
 	authService := service.NewAuthService(repo, jwtConfig)
 
 	healthHandler := httpHandler.NewHealthHandler()
