@@ -784,6 +784,29 @@ definitions:
       currency:
         type: string
         example: RUB
+      categories:
+        type: array
+        items:
+          $ref: '#/definitions/ReportCategory'
+  ReportCategory:
+    type: object
+    properties:
+      category:
+        type: string
+        example: Продукты
+      total_expense:
+        type: number
+        format: double
+        example: 30000
+      budget_amount:
+        type: number
+        format: double
+        example: 50000
+      budget_usage_percent:
+        type: number
+        format: double
+        example: 60
+        x-nullable: true
       category:
         type: string
         example: Продукты

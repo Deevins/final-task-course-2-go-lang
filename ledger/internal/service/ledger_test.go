@@ -104,7 +104,7 @@ func TestBudgetTransactionsAndReport(t *testing.T) {
 				}
 				assertFloatNear(t, categorySummary.TotalExpense, 90)
 				assertFloatNear(t, categorySummary.BudgetAmount, 100)
-				assertFloatNear(t, categorySummary.BudgetUsagePercent, 90)
+				assertFloatPtrNear(t, categorySummary.BudgetUsagePercent, 90)
 			},
 		},
 	}
@@ -119,4 +119,12 @@ func assertFloatNear(t *testing.T, got, want float64) {
 	if math.Abs(got-want) > 0.0001 {
 		t.Fatalf("expected %.2f, got %.2f", want, got)
 	}
+}
+
+func assertFloatPtrNear(t *testing.T, got *float64, want float64) {
+	t.Helper()
+	if got == nil {
+		t.Fatalf("expected %.2f, got nil", want)
+	}
+	assertFloatNear(t, *got, want)
 }

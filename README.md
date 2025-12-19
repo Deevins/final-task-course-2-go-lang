@@ -174,3 +174,27 @@ curl -X POST http://localhost:8081/api/ledger/reports \
     "currency": "RUB"
   }'
 ```
+
+Пример ответа отчета с разбивкой по категориям (при `budget_amount = 0` поле
+`budget_usage_percent` возвращается как `null`):
+
+```json
+{
+  "id": "11111111-1111-1111-1111-111111111111",
+  "account_id": "22222222-2222-2222-2222-222222222222",
+  "name": "Январь 2024",
+  "period": "2024-01",
+  "generated_at": "2024-01-31T23:59:59Z",
+  "total_income": 50000,
+  "total_expense": 30000,
+  "currency": "RUB",
+  "categories": [
+    {
+      "category": "Продукты",
+      "total_expense": 30000,
+      "budget_amount": 0,
+      "budget_usage_percent": null
+    }
+  ]
+}
+```

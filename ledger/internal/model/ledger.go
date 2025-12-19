@@ -42,7 +42,7 @@ type ReportCategory struct {
 	Category           string
 	TotalExpense       float64
 	BudgetAmount       float64
-	BudgetUsagePercent float64
+	BudgetUsagePercent *float64
 }
 
 type TransactionCSVRow struct {

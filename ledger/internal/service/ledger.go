@@ -403,9 +403,10 @@ func buildReportSummary(transactions []model.Transaction, budgets []model.Budget
 	for _, category := range categories {
 		total := categoryTotals[category]
 		budgetAmount := findBudgetAmount(budgets, category, resolvedCurrency, start, end)
-		percent := 0.0
+		var percent *float64
 		if budgetAmount > 0 {
-			percent = (total / budgetAmount) * 100
+			value := (total / budgetAmount) * 100
+			percent = &value
 		}
 		results = append(results, model.ReportCategory{
 			Category:           category,

@@ -1403,9 +1403,40 @@
           "type": "string",
           "example": "RUB"
         },
+        "categories": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ReportCategory"
+          }
+        },
         "account_id": {
           "type": "string",
           "example": "22222222-2222-2222-2222-222222222222"
+        }
+      }
+    },
+    "ReportCategory": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "string",
+          "example": "Продукты"
+        },
+        "total_expense": {
+          "type": "number",
+          "format": "double",
+          "example": 30000
+        },
+        "budget_amount": {
+          "type": "number",
+          "format": "double",
+          "example": 50000
+        },
+        "budget_usage_percent": {
+          "type": "number",
+          "format": "double",
+          "example": 60,
+          "x-nullable": true
         }
       }
     },
