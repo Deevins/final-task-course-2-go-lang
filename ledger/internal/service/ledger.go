@@ -130,7 +130,7 @@ func (s *DefaultLedgerService) UpdateBudget(ctx context.Context, budget model.Bu
 	}
 	budget.CreatedAt = current.CreatedAt
 	budget.UpdatedAt = time.Now().UTC()
-	if budget.Month == "" {
+	if budget.Month.IsZero() {
 		budget.Month = current.Month
 	}
 	return s.repo.UpdateBudget(ctx, budget)
