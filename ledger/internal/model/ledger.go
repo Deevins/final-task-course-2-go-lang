@@ -1,0 +1,37 @@
+package model
+
+import "time"
+
+type Transaction struct {
+	ID          string
+	AccountID   string
+	Amount      float64
+	Currency    string
+	Category    string
+	Description string
+	OccurredAt  time.Time
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
+type Budget struct {
+	ID        string
+	Name      string
+	Amount    float64
+	Currency  string
+	Period    string
+	StartDate time.Time
+	EndDate   time.Time
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+type Report struct {
+	ID           string
+	Name         string
+	Period       string
+	GeneratedAt  time.Time
+	TotalIncome  float64
+	TotalExpense float64
+	Currency     string
+}
