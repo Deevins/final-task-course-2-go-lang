@@ -352,8 +352,7 @@ func toModelBudget(budget *pb.Budget) model.Budget {
 		Amount:    budget.GetAmount(),
 		Currency:  budget.GetCurrency(),
 		Period:    budget.GetPeriod(),
-		StartDate: toTime(budget.GetStartDate()),
-		EndDate:   toTime(budget.GetEndDate()),
+		Month:     toTime(budget.GetMonth()),
 		CreatedAt: toTime(budget.GetCreatedAt()),
 		UpdatedAt: toTime(budget.GetUpdatedAt()),
 	}
@@ -367,8 +366,7 @@ func toProtoBudget(budget model.Budget) *pb.Budget {
 		Amount:    budget.Amount,
 		Currency:  budget.Currency,
 		Period:    budget.Period,
-		StartDate: timestamppb.New(budget.StartDate),
-		EndDate:   timestamppb.New(budget.EndDate),
+		Month:     timestamppb.New(budget.Month),
 		CreatedAt: timestamppb.New(budget.CreatedAt),
 		UpdatedAt: timestamppb.New(budget.UpdatedAt),
 	}

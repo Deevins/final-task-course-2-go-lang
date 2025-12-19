@@ -21,8 +21,7 @@ type Budget struct {
 	Amount    float64
 	Currency  string
 	Period    string
-	StartDate time.Time
-	EndDate   time.Time
+	Month     time.Time
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

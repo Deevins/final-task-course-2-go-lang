@@ -105,6 +105,7 @@ curl -X POST http://localhost:8081/api/auth/signin \
   - `PUT /api/ledger/budgets/{id}`
   - `PATCH /api/ledger/budgets/{id}`
   - `DELETE /api/ledger/budgets/{id}`
+  - Бюджет задается только на месяц (поле `month` — дата первого дня месяца в формате RFC3339), а категория определяется полем `name`.
 - Отчеты:
   - `GET /api/ledger/reports`
   - `POST /api/ledger/reports`

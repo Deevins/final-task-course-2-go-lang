@@ -115,8 +115,7 @@ func (s *ledgerGatewayService) CreateBudget(ctx context.Context, accountID strin
 			Amount:    req.Amount,
 			Currency:  req.Currency,
 			Period:    req.Period,
-			StartDate: timestamppb.New(req.StartDate),
-			EndDate:   timestamppb.New(req.EndDate),
+			Month:     timestamppb.New(req.Month),
 		},
 	})
 	if err != nil {
@@ -142,8 +141,7 @@ func (s *ledgerGatewayService) UpdateBudget(ctx context.Context, accountID, id s
 			Amount:    req.Amount,
 			Currency:  req.Currency,
 			Period:    req.Period,
-			StartDate: timestamppb.New(req.StartDate),
-			EndDate:   timestamppb.New(req.EndDate),
+			Month:     timestamppb.New(req.Month),
 		},
 	})
 	if err != nil {
@@ -280,8 +278,7 @@ func fromProtoBudgets(items []*ledgerv1.Budget) []model.Budget {
 			Amount:    item.GetAmount(),
 			Currency:  item.GetCurrency(),
 			Period:    item.GetPeriod(),
-			StartDate: toTime(item.GetStartDate()),
-			EndDate:   toTime(item.GetEndDate()),
+			Month:     toTime(item.GetMonth()),
 			CreatedAt: toTime(item.GetCreatedAt()),
 			UpdatedAt: toTime(item.GetUpdatedAt()),
 		})
@@ -300,8 +297,7 @@ func fromProtoBudget(item *ledgerv1.Budget) *model.Budget {
 		Amount:    item.GetAmount(),
 		Currency:  item.GetCurrency(),
 		Period:    item.GetPeriod(),
-		StartDate: toTime(item.GetStartDate()),
-		EndDate:   toTime(item.GetEndDate()),
+		Month:     toTime(item.GetMonth()),
 		CreatedAt: toTime(item.GetCreatedAt()),
 		UpdatedAt: toTime(item.GetUpdatedAt()),
 	}

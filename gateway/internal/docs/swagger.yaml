@@ -880,14 +880,10 @@ definitions:
       period:
         type: string
         example: monthly
-      start_date:
+      month:
         type: string
         format: date-time
         example: 2024-01-01T00:00:00Z
-      end_date:
-        type: string
-        format: date-time
-        example: 2024-01-31T23:59:59Z
       created_at:
         type: string
         format: date-time
@@ -912,21 +908,16 @@ definitions:
       period:
         type: string
         example: monthly
-      start_date:
+      month:
         type: string
         format: date-time
         example: 2024-01-01T00:00:00Z
-      end_date:
-        type: string
-        format: date-time
-        example: 2024-01-31T23:59:59Z
     required:
       - name
       - amount
       - currency
       - period
-      - start_date
-      - end_date
+      - month
   UpdateBudgetRequest:
     type: object
     properties:
@@ -943,21 +934,16 @@ definitions:
       period:
         type: string
         example: monthly
-      start_date:
+      month:
         type: string
         format: date-time
         example: 2024-01-01T00:00:00Z
-      end_date:
-        type: string
-        format: date-time
-        example: 2024-01-31T23:59:59Z
     required:
       - name
       - amount
       - currency
       - period
-      - start_date
-      - end_date
+      - month
   Report:
     type: object
     properties:

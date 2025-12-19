@@ -152,9 +152,9 @@ func NewPostgresBudgetRepository(db *pgxpool.Pool) *PostgresBudgetRepository {
 
 func (r *PostgresBudgetRepository) CreateBudget(ctx context.Context, budget model.Budget) (model.Budget, error) {
 	const query = `
-		INSERT INTO budgets (id, account_id, name, amount, currency, period, start_date, end_date, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
-	_, err := r.db.Exec(ctx, query, budget.ID, budget.AccountID, budget.Name, budget.Amount, budget.Currency, budget.Period, budget.StartDate, budget.EndDate, budget.CreatedAt, budget.UpdatedAt)
+		INSERT INTO budgets (id, account_id, name, amount, currency, period, month, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
+	_, err := r.db.Exec(ctx, query, budget.ID, budget.AccountID, budget.Name, budget.Amount, budget.Currency, budget.Period, budget.Month, budget.CreatedAt, budget.UpdatedAt)
 	if err != nil {
 		return model.Budget{}, err
 	}
@@ -163,7 +163,7 @@ func (r *PostgresBudgetRepository) CreateBudget(ctx context.Context, budget mode
 
 func (r *PostgresBudgetRepository) GetBudget(ctx context.Context, accountID, id string) (model.Budget, error) {
 	const query = `
-		SELECT id, account_id, name, amount, currency, period, start_date, end_date, created_at, updated_at
+		SELECT id, account_id, name, amount, currency, period, month, created_at, updated_at
 		FROM budgets
 		WHERE id = $1 AND account_id = $2`
 	var budget model.Budget
@@ -174,8 +174,7 @@ func (r *PostgresBudgetRepository) GetBudget(ctx context.Context, accountID, id 
 		&budget.Amount,
 		&budget.Currency,
 		&budget.Period,
-		&budget.StartDate,
-		&budget.EndDate,
+		&budget.Month,
 		&budget.CreatedAt,
 		&budget.UpdatedAt,
 	)
@@ -191,9 +190,9 @@ func (r *PostgresBudgetRepository) GetBudget(ctx context.Context, accountID, id 
 func (r *PostgresBudgetRepository) UpdateBudget(ctx context.Context, budget model.Budget) (model.Budget, error) {
 	const query = `
 		UPDATE budgets
-		SET name = $3, amount = $4, currency = $5, period = $6, start_date = $7, end_date = $8, created_at = $9, updated_at = $10
+		SET name = $3, amount = $4, currency = $5, period = $6, month = $7, created_at = $8, updated_at = $9
 		WHERE id = $1 AND account_id = $2`
-	result, err := r.db.Exec(ctx, query, budget.ID, budget.AccountID, budget.Name, budget.Amount, budget.Currency, budget.Period, budget.StartDate, budget.EndDate, budget.CreatedAt, budget.UpdatedAt)
+	result, err := r.db.Exec(ctx, query, budget.ID, budget.AccountID, budget.Name, budget.Amount, budget.Currency, budget.Period, budget.Month, budget.CreatedAt, budget.UpdatedAt)
 	if err != nil {
 		return model.Budget{}, err
 	}
@@ -217,7 +216,7 @@ func (r *PostgresBudgetRepository) DeleteBudget(ctx context.Context, accountID, 
 
 func (r *PostgresBudgetRepository) ListBudgets(ctx context.Context, accountID string) []model.Budget {
 	const query = `
-		SELECT id, account_id, name, amount, currency, period, start_date, end_date, created_at, updated_at
+		SELECT id, account_id, name, amount, currency, period, month, created_at, updated_at
 		FROM budgets
 		WHERE account_id = $1`
 	rows, err := r.db.Query(ctx, query, accountID)
@@ -236,8 +235,7 @@ func (r *PostgresBudgetRepository) ListBudgets(ctx context.Context, accountID st
 			&budget.Amount,
 			&budget.Currency,
 			&budget.Period,
-			&budget.StartDate,
-			&budget.EndDate,
+			&budget.Month,
 			&budget.CreatedAt,
 			&budget.UpdatedAt,
 		); err != nil {

@@ -43,30 +43,27 @@ type Budget struct {
 	Amount    float64   `json:"amount" example:"10000"`
 	Currency  string    `json:"currency" example:"RUB"`
 	Period    string    `json:"period" example:"monthly"`
-	StartDate time.Time `json:"start_date" example:"2024-01-01T00:00:00Z"`
-	EndDate   time.Time `json:"end_date" example:"2024-01-31T23:59:59Z"`
+	Month     time.Time `json:"month" example:"2024-01-01T00:00:00Z"`
 	CreatedAt time.Time `json:"created_at" example:"2024-01-01T00:00:00Z"`
 	UpdatedAt time.Time `json:"updated_at" example:"2024-01-01T00:00:00Z"`
 }
 
 // CreateBudgetRequest описывает запрос на создание бюджета.
 type CreateBudgetRequest struct {
-	Name      string    `json:"name" binding:"required" example:"Еда"`
-	Amount    float64   `json:"amount" binding:"required" example:"10000"`
-	Currency  string    `json:"currency" binding:"required" example:"RUB"`
-	Period    string    `json:"period" binding:"required" example:"monthly"`
-	StartDate time.Time `json:"start_date" binding:"required" example:"2024-01-01T00:00:00Z"`
-	EndDate   time.Time `json:"end_date" binding:"required" example:"2024-01-31T23:59:59Z"`
+	Name     string    `json:"name" binding:"required" example:"Еда"`
+	Amount   float64   `json:"amount" binding:"required" example:"10000"`
+	Currency string    `json:"currency" binding:"required" example:"RUB"`
+	Period   string    `json:"period" binding:"required" example:"monthly"`
+	Month    time.Time `json:"month" binding:"required" example:"2024-01-01T00:00:00Z"`
 }
 
 // UpdateBudgetRequest описывает запрос на обновление бюджета.
 type UpdateBudgetRequest struct {
-	Name      string    `json:"name" binding:"required" example:"Еда"`
-	Amount    float64   `json:"amount" binding:"required" example:"10000"`
-	Currency  string    `json:"currency" binding:"required" example:"RUB"`
-	Period    string    `json:"period" binding:"required" example:"monthly"`
-	StartDate time.Time `json:"start_date" binding:"required" example:"2024-01-01T00:00:00Z"`
-	EndDate   time.Time `json:"end_date" binding:"required" example:"2024-01-31T23:59:59Z"`
+	Name     string    `json:"name" binding:"required" example:"Еда"`
+	Amount   float64   `json:"amount" binding:"required" example:"10000"`
+	Currency string    `json:"currency" binding:"required" example:"RUB"`
+	Period   string    `json:"period" binding:"required" example:"monthly"`
+	Month    time.Time `json:"month" binding:"required" example:"2024-01-01T00:00:00Z"`
 }
 
 // Report описывает отчет.

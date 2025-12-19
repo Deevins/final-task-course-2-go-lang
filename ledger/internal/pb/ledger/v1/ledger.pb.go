@@ -138,10 +138,9 @@ type Budget struct {
 	Amount        float64                `protobuf:"fixed64,4,opt,name=amount,proto3" json:"amount,omitempty"`
 	Currency      string                 `protobuf:"bytes,5,opt,name=currency,proto3" json:"currency,omitempty"`
 	Period        string                 `protobuf:"bytes,6,opt,name=period,proto3" json:"period,omitempty"`
-	StartDate     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
-	EndDate       *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=end_date,json=endDate,proto3" json:"end_date,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Month         *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=month,proto3" json:"month,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -218,16 +217,9 @@ func (x *Budget) GetPeriod() string {
 	return ""
 }
 
-func (x *Budget) GetStartDate() *timestamppb.Timestamp {
+func (x *Budget) GetMonth() *timestamppb.Timestamp {
 	if x != nil {
-		return x.StartDate
-	}
-	return nil
-}
-
-func (x *Budget) GetEndDate() *timestamppb.Timestamp {
-	if x != nil {
-		return x.EndDate
+		return x.Month
 	}
 	return nil
 }
@@ -1638,13 +1630,11 @@ const file_ledger_v1_ledger_proto_rawDesc = "" +
 	"\bcurrency\x18\x05 \x01(\tR\bcurrency\x12\x16\n" +
 	"\x06period\x18\x06 \x01(\tR\x06period\x129\n" +
 	"\n" +
-	"start_date\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tstartDate\x125\n" +
-	"\bend_date\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\aendDate\x129\n" +
+	"month\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\x05month\x129\n" +
 	"\n" +
-	"created_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\n" +
-	" \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x86\x02\n" +
+	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x86\x02\n" +
 	"\x06Report\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
 	"\n" +
@@ -1803,23 +1793,22 @@ var file_ledger_v1_ledger_proto_depIdxs = []int32{
 	29, // 0: ledger.v1.Transaction.occurred_at:type_name -> google.protobuf.Timestamp
 	29, // 1: ledger.v1.Transaction.created_at:type_name -> google.protobuf.Timestamp
 	29, // 2: ledger.v1.Transaction.updated_at:type_name -> google.protobuf.Timestamp
-	29, // 3: ledger.v1.Budget.start_date:type_name -> google.protobuf.Timestamp
-	29, // 4: ledger.v1.Budget.end_date:type_name -> google.protobuf.Timestamp
-	29, // 5: ledger.v1.Budget.created_at:type_name -> google.protobuf.Timestamp
-	29, // 6: ledger.v1.Budget.updated_at:type_name -> google.protobuf.Timestamp
-	29, // 7: ledger.v1.Report.generated_at:type_name -> google.protobuf.Timestamp
-	0,  // 8: ledger.v1.CreateTransactionRequest.transaction:type_name -> ledger.v1.Transaction
-	0,  // 9: ledger.v1.UpdateTransactionRequest.transaction:type_name -> ledger.v1.Transaction
-	0,  // 10: ledger.v1.ListTransactionsResponse.transactions:type_name -> ledger.v1.Transaction
-	0,  // 11: ledger.v1.TransactionResponse.transaction:type_name -> ledger.v1.Transaction
-	1,  // 12: ledger.v1.CreateBudgetRequest.budget:type_name -> ledger.v1.Budget
-	1,  // 13: ledger.v1.UpdateBudgetRequest.budget:type_name -> ledger.v1.Budget
-	1,  // 14: ledger.v1.ListBudgetsResponse.budgets:type_name -> ledger.v1.Budget
-	1,  // 15: ledger.v1.BudgetResponse.budget:type_name -> ledger.v1.Budget
-	2,  // 16: ledger.v1.CreateReportRequest.report:type_name -> ledger.v1.Report
-	2,  // 17: ledger.v1.UpdateReportRequest.report:type_name -> ledger.v1.Report
-	2,  // 18: ledger.v1.ListReportsResponse.reports:type_name -> ledger.v1.Report
-	2,  // 19: ledger.v1.ReportResponse.report:type_name -> ledger.v1.Report
+	29, // 3: ledger.v1.Budget.month:type_name -> google.protobuf.Timestamp
+	29, // 4: ledger.v1.Budget.created_at:type_name -> google.protobuf.Timestamp
+	29, // 5: ledger.v1.Budget.updated_at:type_name -> google.protobuf.Timestamp
+	29, // 6: ledger.v1.Report.generated_at:type_name -> google.protobuf.Timestamp
+	0,  // 7: ledger.v1.CreateTransactionRequest.transaction:type_name -> ledger.v1.Transaction
+	0,  // 8: ledger.v1.UpdateTransactionRequest.transaction:type_name -> ledger.v1.Transaction
+	0,  // 9: ledger.v1.ListTransactionsResponse.transactions:type_name -> ledger.v1.Transaction
+	0,  // 10: ledger.v1.TransactionResponse.transaction:type_name -> ledger.v1.Transaction
+	1,  // 11: ledger.v1.CreateBudgetRequest.budget:type_name -> ledger.v1.Budget
+	1,  // 12: ledger.v1.UpdateBudgetRequest.budget:type_name -> ledger.v1.Budget
+	1,  // 13: ledger.v1.ListBudgetsResponse.budgets:type_name -> ledger.v1.Budget
+	1,  // 14: ledger.v1.BudgetResponse.budget:type_name -> ledger.v1.Budget
+	2,  // 15: ledger.v1.CreateReportRequest.report:type_name -> ledger.v1.Report
+	2,  // 16: ledger.v1.UpdateReportRequest.report:type_name -> ledger.v1.Report
+	2,  // 17: ledger.v1.ListReportsResponse.reports:type_name -> ledger.v1.Report
+	2,  // 18: ledger.v1.ReportResponse.report:type_name -> ledger.v1.Report
 	3,  // 20: ledger.v1.LedgerService.CreateTransaction:input_type -> ledger.v1.CreateTransactionRequest
 	4,  // 21: ledger.v1.LedgerService.GetTransaction:input_type -> ledger.v1.GetTransactionRequest
 	5,  // 22: ledger.v1.LedgerService.UpdateTransaction:input_type -> ledger.v1.UpdateTransactionRequest

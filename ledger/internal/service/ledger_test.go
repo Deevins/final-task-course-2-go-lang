@@ -28,15 +28,14 @@ func TestBudgetTransactionsAndReport(t *testing.T) {
 				category := "Food"
 				currency := "USD"
 				start := time.Date(2024, time.May, 1, 0, 0, 0, 0, time.UTC)
-				end := start.AddDate(0, 1, 0).Add(-time.Nanosecond)
 
 				_, err := service.CreateBudget(ctx, model.Budget{
 					AccountID: accountID,
 					Name:      category,
 					Amount:    100,
 					Currency:  currency,
-					StartDate: start,
-					EndDate:   end,
+					Period:    "monthly",
+					Month:     start,
 				})
 				if err != nil {
 					t.Fatalf("create budget: %v", err)

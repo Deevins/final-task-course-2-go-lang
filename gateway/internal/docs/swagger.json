@@ -1313,15 +1313,10 @@
           "type": "string",
           "example": "monthly"
         },
-        "start_date": {
+        "month": {
           "type": "string",
           "format": "date-time",
           "example": "2024-01-01T00:00:00Z"
-        },
-        "end_date": {
-          "type": "string",
-          "format": "date-time",
-          "example": "2024-01-31T23:59:59Z"
         },
         "created_at": {
           "type": "string",
@@ -1359,15 +1354,10 @@
           "type": "string",
           "example": "monthly"
         },
-        "start_date": {
+        "month": {
           "type": "string",
           "format": "date-time",
           "example": "2024-01-01T00:00:00Z"
-        },
-        "end_date": {
-          "type": "string",
-          "format": "date-time",
-          "example": "2024-01-31T23:59:59Z"
         }
       },
       "required": [
@@ -1375,8 +1365,7 @@
         "amount",
         "currency",
         "period",
-        "start_date",
-        "end_date"
+        "month"
       ]
     },
     "Report": {
@@ -1573,15 +1562,10 @@
           "type": "string",
           "example": "monthly"
         },
-        "start_date": {
+        "month": {
           "type": "string",
           "format": "date-time",
           "example": "2024-01-01T00:00:00Z"
-        },
-        "end_date": {
-          "type": "string",
-          "format": "date-time",
-          "example": "2024-01-31T23:59:59Z"
         }
       },
       "required": [
@@ -1589,8 +1573,7 @@
         "amount",
         "currency",
         "period",
-        "start_date",
-        "end_date"
+        "month"
       ]
     },
     "UpdateReportRequest": {

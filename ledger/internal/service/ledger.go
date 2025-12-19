@@ -130,11 +130,8 @@ func (s *DefaultLedgerService) UpdateBudget(ctx context.Context, budget model.Bu
 	}
 	budget.CreatedAt = current.CreatedAt
 	budget.UpdatedAt = time.Now().UTC()
-	if budget.StartDate.IsZero() {
-		budget.StartDate = current.StartDate
-	}
-	if budget.EndDate.IsZero() {
-		budget.EndDate = current.EndDate
+	if budget.Month == "" {
+		budget.Month = current.Month
 	}
 	return s.repo.UpdateBudget(ctx, budget)
 }
@@ -326,7 +323,8 @@ func (s *DefaultLedgerService) ensureBudgetAvailable(ctx context.Context, tx mod
 		if budget.Name != tx.Category {
 			continue
 		}
-		if !withinPeriod(tx.OccurredAt, budget.StartDate, budget.EndDate) {
+		budgetStart, budgetEnd := monthRange(budget.Month)
+		if !withinPeriod(tx.OccurredAt, budgetStart, budgetEnd) {
 			continue
 		}
 		total := 0.0
@@ -337,7 +335,7 @@ func (s *DefaultLedgerService) ensureBudgetAvailable(ctx context.Context, tx mod
 			if existing.Currency != tx.Currency || existing.Category != tx.Category {
 				continue
 			}
-			if !withinPeriod(existing.OccurredAt, budget.StartDate, budget.EndDate) {
+			if !withinPeriod(existing.OccurredAt, budgetStart, budgetEnd) {
 				continue
 			}
 			total += -existing.Amount
@@ -433,7 +431,8 @@ func findBudgetAmount(budgets []model.Budget, category, currency string, start, 
 		if currency != "" && budget.Currency != currency {
 			continue
 		}
-		if !periodsOverlap(budget.StartDate, budget.EndDate, start, end) {
+		budgetStart, budgetEnd := monthRange(budget.Month)
+		if !periodsOverlap(budgetStart, budgetEnd, start, end) {
 			continue
 		}
 		return budget.Amount
@@ -493,6 +492,13 @@ func parsePeriod(value string) (time.Time, time.Time, error) {
 		return time.Time{}, time.Time{}, fmt.Errorf("%w: period end before start", ErrValidation)
 	}
 	return start, end, nil
+}
+
+func monthRange(month time.Time) (time.Time, time.Time) {
+	month = month.UTC()
+	start := time.Date(month.Year(), month.Month(), 1, 0, 0, 0, 0, time.UTC)
+	end := start.AddDate(0, 1, 0).Add(-time.Nanosecond)
+	return start, end
 }
 
 func parseTimestamp(value string) (time.Time, error) {
