@@ -34,3 +34,5 @@ CREATE INDEX IF NOT EXISTS budgets_period_idx ON budgets (period);
 -- +goose Down
 DROP TABLE IF EXISTS transactions;
 DROP TABLE IF EXISTS budgets;
+
+
