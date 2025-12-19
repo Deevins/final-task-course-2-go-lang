@@ -14,7 +14,6 @@ import (
 	"github.com/Deevins/final-task-course-2-go-lang/gateway/internal/handler"
 	"github.com/Deevins/final-task-course-2-go-lang/gateway/internal/middleware"
 	authv1 "github.com/Deevins/final-task-course-2-go-lang/gateway/internal/pb/auth/v1"
-	budgetv1 "github.com/Deevins/final-task-course-2-go-lang/gateway/internal/pb/budget/v1"
 	ledgerv1 "github.com/Deevins/final-task-course-2-go-lang/gateway/internal/pb/ledger/v1"
 	"github.com/Deevins/final-task-course-2-go-lang/gateway/internal/server/httpserver"
 	"github.com/Deevins/final-task-course-2-go-lang/gateway/internal/service"
@@ -25,14 +24,6 @@ func main() {
 	defer stop()
 
 	cfg := config.Load()
-
-	log.Printf("Connecting to budget gRPC backend at %s", cfg.GRPC.BudgetAddress)
-	budgetConn, err := dialGRPC(cfg.GRPC.BudgetAddress)
-	if err != nil {
-		log.Fatalf("failed to connect to budget gRPC backend: %v", err)
-	}
-	defer budgetConn.Close()
-	log.Printf("Connected to budget gRPC backend successfully")
 
 	log.Printf("Connecting to auth gRPC backend at %s", cfg.GRPC.AuthAddress)
 	authConn, err := dialGRPC(cfg.GRPC.AuthAddress)
@@ -50,17 +41,14 @@ func main() {
 	defer ledgerConn.Close()
 	log.Printf("Connected to ledger gRPC backend successfully")
 
-	budgetService := service.NewBudgetGatewayService(budgetv1.NewBudgetServiceClient(budgetConn))
 	authService := service.NewAuthGatewayService(authv1.NewAuthServiceClient(authConn))
 	ledgerService := service.NewLedgerGatewayService(ledgerv1.NewLedgerServiceClient(ledgerConn))
-	budgetHandler := handler.NewBudgetHandler(budgetService)
 	authHandler := handler.NewAuthHandler(authService)
 	ledgerHandler := handler.NewLedgerHandler(ledgerService)
 
 	engine := gin.New()
 	engine.Use(gin.Logger(), gin.Recovery())
 	api := engine.Group("/api")
-	budgetHandler.Register(api)
 	authHandler.Register(api)
 	ledgerHandler.Register(api, middleware.JWTAuth(authService))
 

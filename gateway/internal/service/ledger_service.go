@@ -1,11 +1,7 @@
 package service
 
 import (
-	"bytes"
 	"context"
-	"encoding/csv"
-	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/Deevins/final-task-course-2-go-lang/gateway/internal/model"
@@ -22,7 +18,6 @@ type LedgerGatewayService interface {
 	CreateReport(ctx context.Context, req model.CreateReportRequest) (*model.Report, error)
 	ImportTransactionsCSV(ctx context.Context, csvContent []byte, hasHeader bool) (int32, error)
 	ExportTransactionsCSV(ctx context.Context, accountID string) ([]byte, error)
-	ImportTransactionsSheet(ctx context.Context, req model.ImportTransactionsSheetRequest) (int32, error)
 }
 
 type ledgerGatewayService struct {
@@ -126,57 +121,6 @@ func (s *ledgerGatewayService) ExportTransactionsCSV(ctx context.Context, accoun
 		return nil, err
 	}
 	return resp.GetCsvContent(), nil
-}
-
-func (s *ledgerGatewayService) ImportTransactionsSheet(ctx context.Context, req model.ImportTransactionsSheetRequest) (int32, error) {
-	csvContent, err := buildSheetCSV(req.Rows)
-	if err != nil {
-		return 0, err
-	}
-	resp, err := s.client.ImportTransactionsCsv(ctx, &ledgerv1.ImportTransactionsCsvRequest{
-		CsvContent: csvContent,
-		HasHeader:  true,
-	})
-	if err != nil {
-		return 0, err
-	}
-	return resp.GetImported(), nil
-}
-
-func buildSheetCSV(rows []model.SheetTransactionRow) ([]byte, error) {
-	if len(rows) == 0 {
-		return nil, fmt.Errorf("rows are required")
-	}
-	var buf bytes.Buffer
-	writer := csv.NewWriter(&buf)
-	if err := writer.Write([]string{
-		"account_id",
-		"amount",
-		"currency",
-		"category",
-		"description",
-		"occurred_at",
-	}); err != nil {
-		return nil, fmt.Errorf("write header: %w", err)
-	}
-	for _, row := range rows {
-		record := []string{
-			row.AccountID,
-			strconv.FormatFloat(row.Amount, 'f', -1, 64),
-			row.Currency,
-			row.Category,
-			row.Description,
-			row.OccurredAt.UTC().Format(time.RFC3339),
-		}
-		if err := writer.Write(record); err != nil {
-			return nil, fmt.Errorf("write row: %w", err)
-		}
-	}
-	writer.Flush()
-	if err := writer.Error(); err != nil {
-		return nil, fmt.Errorf("flush csv: %w", err)
-	}
-	return buf.Bytes(), nil
 }
 
 func fromProtoTransactions(items []*ledgerv1.Transaction) []model.Transaction {

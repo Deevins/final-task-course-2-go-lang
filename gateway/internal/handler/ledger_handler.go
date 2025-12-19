@@ -31,7 +31,6 @@ func (h *LedgerHandler) Register(r *gin.RouterGroup, authMiddleware gin.HandlerF
 		ledger.GET("/reports", h.ListReports)
 		ledger.POST("/reports", h.CreateReport)
 		ledger.POST("/import", h.ImportTransactions)
-		ledger.POST("/sheets/import", h.ImportTransactionsSheet)
 		ledger.GET("/export", h.ExportTransactions)
 	}
 }
@@ -242,32 +241,4 @@ func (h *LedgerHandler) ExportTransactions(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, model.ExportTransactionsResponse{CSVContent: string(csvContent)})
-}
-
-// ImportTransactionsSheet godoc
-// @Summary Импортировать транзакции из Google Sheets
-// @Description Принимает данные транзакций в формате Sheets и проксирует в Ledger.
-// @Tags ledger
-// @Accept json
-// @Produce json
-// @Security BearerAuth
-// @Param request body model.ImportTransactionsSheetRequest true "Данные транзакций из Sheets"
-// @Success 200 {object} model.ImportTransactionsSheetResponse
-// @Failure 400 {object} model.ErrorResponse
-// @Failure 401 {object} model.ErrorResponse
-// @Failure 500 {object} model.ErrorResponse
-// @Router /api/ledger/sheets/import [post]
-func (h *LedgerHandler) ImportTransactionsSheet(c *gin.Context) {
-	var req model.ImportTransactionsSheetRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	imported, err := h.service.ImportTransactionsSheet(c.Request.Context(), req)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, model.ImportTransactionsSheetResponse{Imported: imported})
 }

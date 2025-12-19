@@ -1,6 +1,6 @@
 # Gateway API
 
-HTTP gateway для сервисов авторизации, бюджета и Ledger.
+HTTP gateway для сервисов авторизации и Ledger.
 
 Базовый адрес: `http://localhost:8081`
 
@@ -32,10 +32,6 @@ make start
 - Ledger gRPC: `localhost:9091`
 - Postgres: `localhost:5432` (DB `ledger`, пользователь `postgres`, пароль `postgres`)
 - Redis: `localhost:6379`
-
-> Примечание: адрес gRPC сервиса бюджета задается переменной `GRPC_ADDRESS`.
-> В `docker-compose.yml` он направлен на ledger для упрощенного запуска,
-> при наличии отдельного budget-сервиса поменяйте его на нужный адрес.
 
 ## Авторизация
 
@@ -168,83 +164,4 @@ curl -X POST http://localhost:8081/api/ledger/import \
 ```bash
 curl -H "Authorization: Bearer <jwt>" \
   http://localhost:8081/api/ledger/export
-```
-
-#### Формат данных для Google Sheets (транзакции)
-Для обмена с Google Sheets используется таблица с колонками:
-
-1. `account_id`
-2. `amount`
-3. `currency`
-4. `category`
-5. `description`
-6. `occurred_at` (RFC3339, например `2024-01-01T10:00:00Z`)
-
-Скрипт Google Sheets может считывать строки и отправлять их в Gateway
-в виде JSON-массива объектов, где ключи соответствуют колонкам.
-
-#### POST `/api/ledger/sheets/import`
-Импорт транзакций из Google Sheets (проксируется в Ledger).
-
-```bash
-curl -X POST http://localhost:8081/api/ledger/sheets/import \
-  -H "Authorization: Bearer <jwt>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "rows": [
-      {
-        "account_id": "22222222-2222-2222-2222-222222222222",
-        "amount": 1250.5,
-        "currency": "RUB",
-        "category": "Продукты",
-        "description": "Покупка в магазине",
-        "occurred_at": "2024-01-01T10:00:00Z"
-      }
-    ]
-  }'
-```
-
-#### GET `Ledger HTTP /api/v1/reports/export`
-Экспорт отчета в JSON для Google Sheets скрипта.
-
-```bash
-curl "http://localhost:8083/api/v1/reports/export?report_id=<report_id>"
-```
-
-Ответ содержит:
-
-- `summary` — общие итоги (`total_income`, `total_expense`, `currency`, период).
-- `categories` — строки по категориям с суммой и использованием бюджета.
-
-### Budget
-
-#### POST `/api/budget/export`
-Экспорт бюджета в Google Sheets.
-
-```bash
-curl -X POST http://localhost:8081/api/budget/export \
-  -H "Content-Type: application/json" \
-  -d '{
-    "spreadsheet_id": "1AbCDefGhijk",
-    "sheet_name": "Report",
-    "clear": true,
-    "rows": [
-      {"category": "Продукты", "amount": 1250.5},
-      {"category": "Транспорт", "amount": 500}
-    ]
-  }'
-```
-
-#### GET `/api/budget/import`
-Импорт бюджета из Google Sheets.
-
-```bash
-curl "http://localhost:8081/api/budget/import?spreadsheet_id=1AbCDefGhijk&sheet_name=Report"
-```
-
-#### GET `/api/budget/download`
-Скачать бюджет по умолчанию.
-
-```bash
-curl http://localhost:8081/api/budget/download
 ```

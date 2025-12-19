@@ -19,8 +19,3 @@ type BudgetsResponse struct {
 type ReportsResponse struct {
 	Reports []Report `json:"reports"`
 }
-
-// BudgetRowsResponse описывает строки бюджета.
-type BudgetRowsResponse struct {
-	Rows []SimpleRow `json:"rows"`
-}

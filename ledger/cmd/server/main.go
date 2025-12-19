@@ -55,10 +55,8 @@ func main() {
 	validatedService := service.NewValidationService(ledgerService)
 
 	healthHandler := httpHandler.NewHealthHandler()
-	reportHandler := httpHandler.NewReportHandler(validatedService)
 	api := r.Group("/api/v1")
 	healthHandler.RegisterRoutes(api)
-	reportHandler.RegisterRoutes(api)
 
 	httpPort := cfg.HTTPPort
 	grpcPort := cfg.GRPCPort
