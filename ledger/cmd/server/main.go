@@ -51,7 +51,8 @@ func main() {
 	}()
 
 	repo := repository.NewPostgresLedgerRepository(db)
-	ledgerService := service.NewLedgerService(repo)
+	reportCache := storage.NewReportCache(redisClient, 5*time.Minute)
+	ledgerService := service.NewLedgerService(repo, reportCache)
 	validatedService := service.NewValidationService(ledgerService)
 
 	healthHandler := httpHandler.NewHealthHandler()
