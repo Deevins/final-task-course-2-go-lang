@@ -89,8 +89,7 @@ type Budget struct {
 	Amount    float64
 	Currency  string
 	Period    string
-	StartDate *timestamppb.Timestamp
-	EndDate   *timestamppb.Timestamp
+	Month     *timestamppb.Timestamp
 	CreatedAt *timestamppb.Timestamp
 	UpdatedAt *timestamppb.Timestamp
 }
@@ -137,16 +136,9 @@ func (x *Budget) GetPeriod() string {
 	return ""
 }
 
-func (x *Budget) GetStartDate() *timestamppb.Timestamp {
+func (x *Budget) GetMonth() *timestamppb.Timestamp {
 	if x != nil {
-		return x.StartDate
-	}
-	return nil
-}
-
-func (x *Budget) GetEndDate() *timestamppb.Timestamp {
-	if x != nil {
-		return x.EndDate
+		return x.Month
 	}
 	return nil
 }

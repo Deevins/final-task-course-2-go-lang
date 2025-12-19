@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/Deevins/final-task-course-2-go-lang/ledger/internal/model"
 )
@@ -187,10 +188,24 @@ func validateBudget(budget model.Budget, requireID bool) error {
 	if budget.Currency == "" {
 		return fmt.Errorf("%w: currency is required", ErrValidation)
 	}
-	if !budget.StartDate.IsZero() && !budget.EndDate.IsZero() {
-		if budget.EndDate.Before(budget.StartDate) {
-			return fmt.Errorf("%w: end date must be after start date", ErrValidation)
-		}
+	if budget.Period != "monthly" {
+		return fmt.Errorf("%w: period must be monthly", ErrValidation)
+	}
+	if err := validateMonth(budget.Month); err != nil {
+		return fmt.Errorf("%w: %v", ErrValidation, err)
+	}
+	return nil
+}
+
+func validateMonth(month time.Time) error {
+	if month.IsZero() {
+		return fmt.Errorf("month is required")
+	}
+	if month.Location() != time.UTC {
+		month = month.UTC()
+	}
+	if month.Day() != 1 || month.Hour() != 0 || month.Minute() != 0 || month.Second() != 0 || month.Nanosecond() != 0 {
+		return fmt.Errorf("month must be the first day of the month at 00:00:00Z")
 	}
 	return nil
 }
