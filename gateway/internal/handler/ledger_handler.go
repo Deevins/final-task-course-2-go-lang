@@ -24,12 +24,21 @@ func (h *LedgerHandler) Register(r *gin.RouterGroup, authMiddleware gin.HandlerF
 	ledger := r.Group("/ledger")
 	ledger.Use(authMiddleware)
 	{
-		ledger.GET("/transactions", h.ListTransactions)
-		ledger.POST("/transactions", h.CreateTransaction)
-		ledger.GET("/budgets", h.ListBudgets)
-		ledger.POST("/budgets", h.CreateBudget)
-		ledger.GET("/reports", h.ListReports)
-		ledger.POST("/reports", h.CreateReport)
+		transactions := ledger.Group("/transactions")
+		{
+			transactions.GET("", h.ListTransactions)
+			transactions.POST("", h.CreateTransaction)
+		}
+		budgets := ledger.Group("/budgets")
+		{
+			budgets.GET("", h.ListBudgets)
+			budgets.POST("", h.CreateBudget)
+		}
+		reports := ledger.Group("/reports")
+		{
+			reports.GET("", h.ListReports)
+			reports.POST("", h.CreateReport)
+		}
 		ledger.POST("/import", h.ImportTransactions)
 		ledger.GET("/export", h.ExportTransactions)
 	}
