@@ -84,6 +84,7 @@ func (x *Transaction) GetUpdatedAt() *timestamppb.Timestamp {
 
 type Budget struct {
 	Id        string
+	AccountId string
 	Name      string
 	Amount    float64
 	Currency  string
@@ -97,6 +98,13 @@ type Budget struct {
 func (x *Budget) GetId() string {
 	if x != nil {
 		return x.Id
+	}
+	return ""
+}
+
+func (x *Budget) GetAccountId() string {
+	if x != nil {
+		return x.AccountId
 	}
 	return ""
 }
@@ -159,6 +167,7 @@ func (x *Budget) GetUpdatedAt() *timestamppb.Timestamp {
 
 type Report struct {
 	Id           string
+	AccountId    string
 	Name         string
 	Period       string
 	GeneratedAt  *timestamppb.Timestamp
@@ -170,6 +179,13 @@ type Report struct {
 func (x *Report) GetId() string {
 	if x != nil {
 		return x.Id
+	}
+	return ""
+}
+
+func (x *Report) GetAccountId() string {
+	if x != nil {
+		return x.AccountId
 	}
 	return ""
 }
@@ -340,12 +356,20 @@ func (x *CreateBudgetRequest) GetBudget() *Budget {
 }
 
 type GetBudgetRequest struct {
-	Id string
+	Id        string
+	AccountId string
 }
 
 func (x *GetBudgetRequest) GetId() string {
 	if x != nil {
 		return x.Id
+	}
+	return ""
+}
+
+func (x *GetBudgetRequest) GetAccountId() string {
+	if x != nil {
+		return x.AccountId
 	}
 	return ""
 }
@@ -362,7 +386,8 @@ func (x *UpdateBudgetRequest) GetBudget() *Budget {
 }
 
 type DeleteBudgetRequest struct {
-	Id string
+	Id        string
+	AccountId string
 }
 
 func (x *DeleteBudgetRequest) GetId() string {
@@ -372,9 +397,24 @@ func (x *DeleteBudgetRequest) GetId() string {
 	return ""
 }
 
+func (x *DeleteBudgetRequest) GetAccountId() string {
+	if x != nil {
+		return x.AccountId
+	}
+	return ""
+}
+
 type ListBudgetsRequest struct {
+	AccountId string
 	Limit     int32
 	PageToken string
+}
+
+func (x *ListBudgetsRequest) GetAccountId() string {
+	if x != nil {
+		return x.AccountId
+	}
+	return ""
 }
 
 func (x *ListBudgetsRequest) GetLimit() int32 {
@@ -433,12 +473,20 @@ func (x *CreateReportRequest) GetReport() *Report {
 }
 
 type GetReportRequest struct {
-	Id string
+	Id        string
+	AccountId string
 }
 
 func (x *GetReportRequest) GetId() string {
 	if x != nil {
 		return x.Id
+	}
+	return ""
+}
+
+func (x *GetReportRequest) GetAccountId() string {
+	if x != nil {
+		return x.AccountId
 	}
 	return ""
 }
@@ -455,7 +503,8 @@ func (x *UpdateReportRequest) GetReport() *Report {
 }
 
 type DeleteReportRequest struct {
-	Id string
+	Id        string
+	AccountId string
 }
 
 func (x *DeleteReportRequest) GetId() string {
@@ -465,9 +514,24 @@ func (x *DeleteReportRequest) GetId() string {
 	return ""
 }
 
+func (x *DeleteReportRequest) GetAccountId() string {
+	if x != nil {
+		return x.AccountId
+	}
+	return ""
+}
+
 type ListReportsRequest struct {
+	AccountId string
 	Limit     int32
 	PageToken string
+}
+
+func (x *ListReportsRequest) GetAccountId() string {
+	if x != nil {
+		return x.AccountId
+	}
+	return ""
 }
 
 func (x *ListReportsRequest) GetLimit() int32 {

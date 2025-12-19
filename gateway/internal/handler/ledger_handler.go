@@ -226,7 +226,13 @@ func (h *LedgerHandler) DeleteTransaction(c *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse
 // @Router /api/ledger/budgets [get]
 func (h *LedgerHandler) ListBudgets(c *gin.Context) {
-	items, err := h.service.ListBudgets(c.Request.Context())
+	accountID := middleware.UserIDFromContext(c)
+	if accountID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not found in context"})
+		return
+	}
+
+	items, err := h.service.ListBudgets(c.Request.Context(), accountID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -254,7 +260,13 @@ func (h *LedgerHandler) CreateBudget(c *gin.Context) {
 		return
 	}
 
-	created, err := h.service.CreateBudget(c.Request.Context(), req)
+	accountID := middleware.UserIDFromContext(c)
+	if accountID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "account_id is required"})
+		return
+	}
+
+	created, err := h.service.CreateBudget(c.Request.Context(), accountID, req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -281,7 +293,13 @@ func (h *LedgerHandler) GetBudget(c *gin.Context) {
 		return
 	}
 
-	item, err := h.service.GetBudget(c.Request.Context(), id)
+	accountID := middleware.UserIDFromContext(c)
+	if accountID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "account_id is required"})
+		return
+	}
+
+	item, err := h.service.GetBudget(c.Request.Context(), accountID, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -317,7 +335,13 @@ func (h *LedgerHandler) UpdateBudget(c *gin.Context) {
 		return
 	}
 
-	updated, err := h.service.UpdateBudget(c.Request.Context(), id, req)
+	accountID := middleware.UserIDFromContext(c)
+	if accountID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "account_id is required"})
+		return
+	}
+
+	updated, err := h.service.UpdateBudget(c.Request.Context(), accountID, id, req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -344,7 +368,13 @@ func (h *LedgerHandler) DeleteBudget(c *gin.Context) {
 		return
 	}
 
-	deleted, err := h.service.DeleteBudget(c.Request.Context(), id)
+	accountID := middleware.UserIDFromContext(c)
+	if accountID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "account_id is required"})
+		return
+	}
+
+	deleted, err := h.service.DeleteBudget(c.Request.Context(), accountID, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -363,7 +393,13 @@ func (h *LedgerHandler) DeleteBudget(c *gin.Context) {
 // @Failure 500 {object} model.ErrorResponse
 // @Router /api/ledger/reports [get]
 func (h *LedgerHandler) ListReports(c *gin.Context) {
-	items, err := h.service.ListReports(c.Request.Context())
+	accountID := middleware.UserIDFromContext(c)
+	if accountID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not found in context"})
+		return
+	}
+
+	items, err := h.service.ListReports(c.Request.Context(), accountID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -391,7 +427,13 @@ func (h *LedgerHandler) CreateReport(c *gin.Context) {
 		return
 	}
 
-	created, err := h.service.CreateReport(c.Request.Context(), req)
+	accountID := middleware.UserIDFromContext(c)
+	if accountID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "account_id is required"})
+		return
+	}
+
+	created, err := h.service.CreateReport(c.Request.Context(), accountID, req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -418,7 +460,13 @@ func (h *LedgerHandler) GetReport(c *gin.Context) {
 		return
 	}
 
-	item, err := h.service.GetReport(c.Request.Context(), id)
+	accountID := middleware.UserIDFromContext(c)
+	if accountID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "account_id is required"})
+		return
+	}
+
+	item, err := h.service.GetReport(c.Request.Context(), accountID, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -454,7 +502,13 @@ func (h *LedgerHandler) UpdateReport(c *gin.Context) {
 		return
 	}
 
-	updated, err := h.service.UpdateReport(c.Request.Context(), id, req)
+	accountID := middleware.UserIDFromContext(c)
+	if accountID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "account_id is required"})
+		return
+	}
+
+	updated, err := h.service.UpdateReport(c.Request.Context(), accountID, id, req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -481,7 +535,13 @@ func (h *LedgerHandler) DeleteReport(c *gin.Context) {
 		return
 	}
 
-	deleted, err := h.service.DeleteReport(c.Request.Context(), id)
+	accountID := middleware.UserIDFromContext(c)
+	if accountID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "account_id is required"})
+		return
+	}
+
+	deleted, err := h.service.DeleteReport(c.Request.Context(), accountID, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

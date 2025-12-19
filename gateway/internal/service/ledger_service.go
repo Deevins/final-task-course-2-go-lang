@@ -15,16 +15,16 @@ type LedgerGatewayService interface {
 	GetTransaction(ctx context.Context, id string) (*model.Transaction, error)
 	UpdateTransaction(ctx context.Context, id string, req model.UpdateTransactionRequest) (*model.Transaction, error)
 	DeleteTransaction(ctx context.Context, id string) (bool, error)
-	ListBudgets(ctx context.Context) ([]model.Budget, error)
-	CreateBudget(ctx context.Context, req model.CreateBudgetRequest) (*model.Budget, error)
-	GetBudget(ctx context.Context, id string) (*model.Budget, error)
-	UpdateBudget(ctx context.Context, id string, req model.UpdateBudgetRequest) (*model.Budget, error)
-	DeleteBudget(ctx context.Context, id string) (bool, error)
-	ListReports(ctx context.Context) ([]model.Report, error)
-	CreateReport(ctx context.Context, req model.CreateReportRequest) (*model.Report, error)
-	GetReport(ctx context.Context, id string) (*model.Report, error)
-	UpdateReport(ctx context.Context, id string, req model.UpdateReportRequest) (*model.Report, error)
-	DeleteReport(ctx context.Context, id string) (bool, error)
+	ListBudgets(ctx context.Context, accountID string) ([]model.Budget, error)
+	CreateBudget(ctx context.Context, accountID string, req model.CreateBudgetRequest) (*model.Budget, error)
+	GetBudget(ctx context.Context, accountID, id string) (*model.Budget, error)
+	UpdateBudget(ctx context.Context, accountID, id string, req model.UpdateBudgetRequest) (*model.Budget, error)
+	DeleteBudget(ctx context.Context, accountID, id string) (bool, error)
+	ListReports(ctx context.Context, accountID string) ([]model.Report, error)
+	CreateReport(ctx context.Context, accountID string, req model.CreateReportRequest) (*model.Report, error)
+	GetReport(ctx context.Context, accountID, id string) (*model.Report, error)
+	UpdateReport(ctx context.Context, accountID, id string, req model.UpdateReportRequest) (*model.Report, error)
+	DeleteReport(ctx context.Context, accountID, id string) (bool, error)
 	ImportTransactionsCSV(ctx context.Context, csvContent []byte, hasHeader bool) (int32, error)
 	ExportTransactionsCSV(ctx context.Context, accountID string) ([]byte, error)
 }
@@ -99,17 +99,18 @@ func (s *ledgerGatewayService) DeleteTransaction(ctx context.Context, id string)
 	return resp.GetDeleted(), nil
 }
 
-func (s *ledgerGatewayService) ListBudgets(ctx context.Context) ([]model.Budget, error) {
-	resp, err := s.client.ListBudgets(ctx, &ledgerv1.ListBudgetsRequest{})
+func (s *ledgerGatewayService) ListBudgets(ctx context.Context, accountID string) ([]model.Budget, error) {
+	resp, err := s.client.ListBudgets(ctx, &ledgerv1.ListBudgetsRequest{AccountId: accountID})
 	if err != nil {
 		return nil, err
 	}
 	return fromProtoBudgets(resp.GetBudgets()), nil
 }
 
-func (s *ledgerGatewayService) CreateBudget(ctx context.Context, req model.CreateBudgetRequest) (*model.Budget, error) {
+func (s *ledgerGatewayService) CreateBudget(ctx context.Context, accountID string, req model.CreateBudgetRequest) (*model.Budget, error) {
 	resp, err := s.client.CreateBudget(ctx, &ledgerv1.CreateBudgetRequest{
 		Budget: &ledgerv1.Budget{
+			AccountId: accountID,
 			Name:      req.Name,
 			Amount:    req.Amount,
 			Currency:  req.Currency,
@@ -124,18 +125,19 @@ func (s *ledgerGatewayService) CreateBudget(ctx context.Context, req model.Creat
 	return fromProtoBudget(resp.GetBudget()), nil
 }
 
-func (s *ledgerGatewayService) GetBudget(ctx context.Context, id string) (*model.Budget, error) {
-	resp, err := s.client.GetBudget(ctx, &ledgerv1.GetBudgetRequest{Id: id})
+func (s *ledgerGatewayService) GetBudget(ctx context.Context, accountID, id string) (*model.Budget, error) {
+	resp, err := s.client.GetBudget(ctx, &ledgerv1.GetBudgetRequest{Id: id, AccountId: accountID})
 	if err != nil {
 		return nil, err
 	}
 	return fromProtoBudget(resp.GetBudget()), nil
 }
 
-func (s *ledgerGatewayService) UpdateBudget(ctx context.Context, id string, req model.UpdateBudgetRequest) (*model.Budget, error) {
+func (s *ledgerGatewayService) UpdateBudget(ctx context.Context, accountID, id string, req model.UpdateBudgetRequest) (*model.Budget, error) {
 	resp, err := s.client.UpdateBudget(ctx, &ledgerv1.UpdateBudgetRequest{
 		Budget: &ledgerv1.Budget{
 			Id:        id,
+			AccountId: accountID,
 			Name:      req.Name,
 			Amount:    req.Amount,
 			Currency:  req.Currency,
@@ -150,25 +152,26 @@ func (s *ledgerGatewayService) UpdateBudget(ctx context.Context, id string, req 
 	return fromProtoBudget(resp.GetBudget()), nil
 }
 
-func (s *ledgerGatewayService) DeleteBudget(ctx context.Context, id string) (bool, error) {
-	resp, err := s.client.DeleteBudget(ctx, &ledgerv1.DeleteBudgetRequest{Id: id})
+func (s *ledgerGatewayService) DeleteBudget(ctx context.Context, accountID, id string) (bool, error) {
+	resp, err := s.client.DeleteBudget(ctx, &ledgerv1.DeleteBudgetRequest{Id: id, AccountId: accountID})
 	if err != nil {
 		return false, err
 	}
 	return resp.GetDeleted(), nil
 }
 
-func (s *ledgerGatewayService) ListReports(ctx context.Context) ([]model.Report, error) {
-	resp, err := s.client.ListReports(ctx, &ledgerv1.ListReportsRequest{})
+func (s *ledgerGatewayService) ListReports(ctx context.Context, accountID string) ([]model.Report, error) {
+	resp, err := s.client.ListReports(ctx, &ledgerv1.ListReportsRequest{AccountId: accountID})
 	if err != nil {
 		return nil, err
 	}
 	return fromProtoReports(resp.GetReports()), nil
 }
 
-func (s *ledgerGatewayService) CreateReport(ctx context.Context, req model.CreateReportRequest) (*model.Report, error) {
+func (s *ledgerGatewayService) CreateReport(ctx context.Context, accountID string, req model.CreateReportRequest) (*model.Report, error) {
 	resp, err := s.client.CreateReport(ctx, &ledgerv1.CreateReportRequest{
 		Report: &ledgerv1.Report{
+			AccountId:   accountID,
 			Name:        req.Name,
 			Period:      req.Period,
 			GeneratedAt: timestamppb.New(req.GeneratedAt),
@@ -181,18 +184,19 @@ func (s *ledgerGatewayService) CreateReport(ctx context.Context, req model.Creat
 	return fromProtoReport(resp.GetReport()), nil
 }
 
-func (s *ledgerGatewayService) GetReport(ctx context.Context, id string) (*model.Report, error) {
-	resp, err := s.client.GetReport(ctx, &ledgerv1.GetReportRequest{Id: id})
+func (s *ledgerGatewayService) GetReport(ctx context.Context, accountID, id string) (*model.Report, error) {
+	resp, err := s.client.GetReport(ctx, &ledgerv1.GetReportRequest{Id: id, AccountId: accountID})
 	if err != nil {
 		return nil, err
 	}
 	return fromProtoReport(resp.GetReport()), nil
 }
 
-func (s *ledgerGatewayService) UpdateReport(ctx context.Context, id string, req model.UpdateReportRequest) (*model.Report, error) {
+func (s *ledgerGatewayService) UpdateReport(ctx context.Context, accountID, id string, req model.UpdateReportRequest) (*model.Report, error) {
 	resp, err := s.client.UpdateReport(ctx, &ledgerv1.UpdateReportRequest{
 		Report: &ledgerv1.Report{
 			Id:          id,
+			AccountId:   accountID,
 			Name:        req.Name,
 			Period:      req.Period,
 			GeneratedAt: timestamppb.New(req.GeneratedAt),
@@ -205,8 +209,8 @@ func (s *ledgerGatewayService) UpdateReport(ctx context.Context, id string, req 
 	return fromProtoReport(resp.GetReport()), nil
 }
 
-func (s *ledgerGatewayService) DeleteReport(ctx context.Context, id string) (bool, error) {
-	resp, err := s.client.DeleteReport(ctx, &ledgerv1.DeleteReportRequest{Id: id})
+func (s *ledgerGatewayService) DeleteReport(ctx context.Context, accountID, id string) (bool, error) {
+	resp, err := s.client.DeleteReport(ctx, &ledgerv1.DeleteReportRequest{Id: id, AccountId: accountID})
 	if err != nil {
 		return false, err
 	}
@@ -270,6 +274,7 @@ func fromProtoBudgets(items []*ledgerv1.Budget) []model.Budget {
 		}
 		out = append(out, model.Budget{
 			ID:        item.GetId(),
+			AccountID: item.GetAccountId(),
 			Name:      item.GetName(),
 			Amount:    item.GetAmount(),
 			Currency:  item.GetCurrency(),
@@ -289,6 +294,7 @@ func fromProtoBudget(item *ledgerv1.Budget) *model.Budget {
 	}
 	return &model.Budget{
 		ID:        item.GetId(),
+		AccountID: item.GetAccountId(),
 		Name:      item.GetName(),
 		Amount:    item.GetAmount(),
 		Currency:  item.GetCurrency(),
@@ -308,6 +314,7 @@ func fromProtoReports(items []*ledgerv1.Report) []model.Report {
 		}
 		out = append(out, model.Report{
 			ID:           item.GetId(),
+			AccountID:    item.GetAccountId(),
 			Name:         item.GetName(),
 			Period:       item.GetPeriod(),
 			GeneratedAt:  toTime(item.GetGeneratedAt()),
@@ -325,6 +332,7 @@ func fromProtoReport(item *ledgerv1.Report) *model.Report {
 	}
 	return &model.Report{
 		ID:           item.GetId(),
+		AccountID:    item.GetAccountId(),
 		Name:         item.GetName(),
 		Period:       item.GetPeriod(),
 		GeneratedAt:  toTime(item.GetGeneratedAt()),

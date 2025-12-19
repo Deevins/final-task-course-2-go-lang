@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package google.protobuf;
+
+option go_package = "google.golang.org/protobuf/types/known/timestamppb";
+
+// Timestamp represents a point in time independent of any time zone or calendar.
+message Timestamp {
+  int64 seconds = 1;
+  int32 nanos = 2;
+}

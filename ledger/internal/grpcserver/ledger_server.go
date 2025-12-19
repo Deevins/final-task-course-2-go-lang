@@ -126,11 +126,17 @@ func (s *LedgerServer) GetBudget(ctx context.Context, req *pb.GetBudgetRequest) 
 	if req.GetId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "id is required")
 	}
+	if req.GetAccountId() == "" {
+		return nil, status.Error(codes.InvalidArgument, "account_id is required")
+	}
 
-	budget, err := s.ledgerService.GetBudget(req.GetId())
+	budget, err := s.ledgerService.GetBudget(req.GetAccountId(), req.GetId())
 	if err != nil {
 		if service.IsNotFound(err) {
 			return nil, status.Error(codes.NotFound, "budget not found")
+		}
+		if service.IsValidationError(err) {
+			return nil, status.Errorf(codes.InvalidArgument, "get budget: %v", err)
 		}
 		return nil, status.Errorf(codes.Internal, "get budget: %v", err)
 	}
@@ -161,8 +167,11 @@ func (s *LedgerServer) DeleteBudget(ctx context.Context, req *pb.DeleteBudgetReq
 	if req.GetId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "id is required")
 	}
+	if req.GetAccountId() == "" {
+		return nil, status.Error(codes.InvalidArgument, "account_id is required")
+	}
 
-	if err := s.ledgerService.DeleteBudget(req.GetId()); err != nil {
+	if err := s.ledgerService.DeleteBudget(req.GetAccountId(), req.GetId()); err != nil {
 		if service.IsNotFound(err) {
 			return &pb.DeleteResponse{Deleted: false}, nil
 		}
@@ -175,8 +184,11 @@ func (s *LedgerServer) DeleteBudget(ctx context.Context, req *pb.DeleteBudgetReq
 	return &pb.DeleteResponse{Deleted: true}, nil
 }
 
-func (s *LedgerServer) ListBudgets(ctx context.Context, _ *pb.ListBudgetsRequest) (*pb.ListBudgetsResponse, error) {
-	items := s.ledgerService.ListBudgets()
+func (s *LedgerServer) ListBudgets(ctx context.Context, req *pb.ListBudgetsRequest) (*pb.ListBudgetsResponse, error) {
+	if req.GetAccountId() == "" {
+		return nil, status.Error(codes.InvalidArgument, "account_id is required")
+	}
+	items := s.ledgerService.ListBudgets(req.GetAccountId())
 	resp := &pb.ListBudgetsResponse{}
 	resp.Budgets = make([]*pb.Budget, 0, len(items))
 	for _, budget := range items {
@@ -205,11 +217,17 @@ func (s *LedgerServer) GetReport(ctx context.Context, req *pb.GetReportRequest) 
 	if req.GetId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "id is required")
 	}
+	if req.GetAccountId() == "" {
+		return nil, status.Error(codes.InvalidArgument, "account_id is required")
+	}
 
-	report, err := s.ledgerService.GetReport(req.GetId())
+	report, err := s.ledgerService.GetReport(req.GetAccountId(), req.GetId())
 	if err != nil {
 		if service.IsNotFound(err) {
 			return nil, status.Error(codes.NotFound, "report not found")
+		}
+		if service.IsValidationError(err) {
+			return nil, status.Errorf(codes.InvalidArgument, "get report: %v", err)
 		}
 		return nil, status.Errorf(codes.Internal, "get report: %v", err)
 	}
@@ -240,8 +258,11 @@ func (s *LedgerServer) DeleteReport(ctx context.Context, req *pb.DeleteReportReq
 	if req.GetId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "id is required")
 	}
+	if req.GetAccountId() == "" {
+		return nil, status.Error(codes.InvalidArgument, "account_id is required")
+	}
 
-	if err := s.ledgerService.DeleteReport(req.GetId()); err != nil {
+	if err := s.ledgerService.DeleteReport(req.GetAccountId(), req.GetId()); err != nil {
 		if service.IsNotFound(err) {
 			return &pb.DeleteResponse{Deleted: false}, nil
 		}
@@ -254,8 +275,11 @@ func (s *LedgerServer) DeleteReport(ctx context.Context, req *pb.DeleteReportReq
 	return &pb.DeleteResponse{Deleted: true}, nil
 }
 
-func (s *LedgerServer) ListReports(ctx context.Context, _ *pb.ListReportsRequest) (*pb.ListReportsResponse, error) {
-	items := s.ledgerService.ListReports()
+func (s *LedgerServer) ListReports(ctx context.Context, req *pb.ListReportsRequest) (*pb.ListReportsResponse, error) {
+	if req.GetAccountId() == "" {
+		return nil, status.Error(codes.InvalidArgument, "account_id is required")
+	}
+	items := s.ledgerService.ListReports(req.GetAccountId())
 	resp := &pb.ListReportsResponse{}
 	resp.Reports = make([]*pb.Report, 0, len(items))
 	for _, report := range items {
@@ -320,6 +344,7 @@ func toProtoTransaction(tx model.Transaction) *pb.Transaction {
 func toModelBudget(budget *pb.Budget) model.Budget {
 	return model.Budget{
 		ID:        budget.GetId(),
+		AccountID: budget.GetAccountId(),
 		Name:      budget.GetName(),
 		Amount:    budget.GetAmount(),
 		Currency:  budget.GetCurrency(),
@@ -334,6 +359,7 @@ func toModelBudget(budget *pb.Budget) model.Budget {
 func toProtoBudget(budget model.Budget) *pb.Budget {
 	return &pb.Budget{
 		Id:        budget.ID,
+		AccountId: budget.AccountID,
 		Name:      budget.Name,
 		Amount:    budget.Amount,
 		Currency:  budget.Currency,
@@ -348,6 +374,7 @@ func toProtoBudget(budget model.Budget) *pb.Budget {
 func toModelReport(report *pb.Report) model.Report {
 	return model.Report{
 		ID:           report.GetId(),
+		AccountID:    report.GetAccountId(),
 		Name:         report.GetName(),
 		Period:       report.GetPeriod(),
 		GeneratedAt:  toTime(report.GetGeneratedAt()),
@@ -360,6 +387,7 @@ func toModelReport(report *pb.Report) model.Report {
 func toProtoReport(report model.Report) *pb.Report {
 	return &pb.Report{
 		Id:           report.ID,
+		AccountId:    report.AccountID,
 		Name:         report.Name,
 		Period:       report.Period,
 		GeneratedAt:  timestamppb.New(report.GeneratedAt),
