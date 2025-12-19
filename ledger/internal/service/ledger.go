@@ -255,7 +255,7 @@ func (s *DefaultLedgerService) ImportTransactionsCSV(ctx context.Context, accoun
 	count := 0
 	for i := start; i < len(records); i++ {
 		row := records[i]
-		if len(row) < 6 {
+		if len(row) != 6 {
 			return count, fmt.Errorf("row %d: expected 6 columns", i+1)
 		}
 
@@ -519,7 +519,6 @@ func parseCSVRecord(row []string) (model.TransactionCSVRow, error) {
 	}
 
 	return model.TransactionCSVRow{
-		AccountID:   row[0],
 		Amount:      amount,
 		Currency:    row[2],
 		Category:    row[3],
