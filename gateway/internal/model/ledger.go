@@ -25,6 +25,16 @@ type CreateTransactionRequest struct {
 	OccurredAt  time.Time `json:"occurred_at" binding:"required" example:"2024-01-01T10:00:00Z"`
 }
 
+// UpdateTransactionRequest описывает запрос на обновление транзакции.
+type UpdateTransactionRequest struct {
+	AccountID   string    `json:"account_id" example:"22222222-2222-2222-2222-222222222222"`
+	Amount      float64   `json:"amount" binding:"required" example:"1250.50"`
+	Currency    string    `json:"currency" binding:"required" example:"RUB"`
+	Category    string    `json:"category" binding:"required" example:"Продукты"`
+	Description string    `json:"description" example:"Покупка в магазине"`
+	OccurredAt  time.Time `json:"occurred_at" binding:"required" example:"2024-01-01T10:00:00Z"`
+}
+
 // Budget описывает бюджет.
 type Budget struct {
 	ID        string    `json:"id" example:"11111111-1111-1111-1111-111111111111"`
@@ -40,6 +50,16 @@ type Budget struct {
 
 // CreateBudgetRequest описывает запрос на создание бюджета.
 type CreateBudgetRequest struct {
+	Name      string    `json:"name" binding:"required" example:"Еда"`
+	Amount    float64   `json:"amount" binding:"required" example:"10000"`
+	Currency  string    `json:"currency" binding:"required" example:"RUB"`
+	Period    string    `json:"period" binding:"required" example:"monthly"`
+	StartDate time.Time `json:"start_date" binding:"required" example:"2024-01-01T00:00:00Z"`
+	EndDate   time.Time `json:"end_date" binding:"required" example:"2024-01-31T23:59:59Z"`
+}
+
+// UpdateBudgetRequest описывает запрос на обновление бюджета.
+type UpdateBudgetRequest struct {
 	Name      string    `json:"name" binding:"required" example:"Еда"`
 	Amount    float64   `json:"amount" binding:"required" example:"10000"`
 	Currency  string    `json:"currency" binding:"required" example:"RUB"`
@@ -67,6 +87,14 @@ type CreateReportRequest struct {
 	Currency    string    `json:"currency" binding:"required" example:"RUB"`
 }
 
+// UpdateReportRequest описывает запрос на обновление отчета.
+type UpdateReportRequest struct {
+	Name        string    `json:"name" binding:"required" example:"Январь 2024"`
+	Period      string    `json:"period" binding:"required" example:"2024-01"`
+	GeneratedAt time.Time `json:"generated_at" binding:"required" example:"2024-01-31T23:59:59Z"`
+	Currency    string    `json:"currency" binding:"required" example:"RUB"`
+}
+
 // ImportTransactionsRequest описывает импорт транзакций из CSV.
 type ImportTransactionsRequest struct {
 	CSVContent string `json:"csv_content" binding:"required" example:"account_id,amount,currency,category,description,occurred_at"`
@@ -81,4 +109,9 @@ type ImportTransactionsResponse struct {
 // ExportTransactionsResponse описывает экспорт в CSV.
 type ExportTransactionsResponse struct {
 	CSVContent string `json:"csv_content" example:"account_id,amount,currency,category,description,occurred_at"`
+}
+
+// DeleteResponse описывает ответ на удаление.
+type DeleteResponse struct {
+	Deleted bool `json:"deleted" example:"true"`
 }
