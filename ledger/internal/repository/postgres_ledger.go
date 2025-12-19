@@ -4,20 +4,19 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/Deevins/final-task-course-2-go-lang/ledger/internal/model"
-	"github.com/Deevins/final-task-course-2-go-lang/ledger/internal/storage"
 )
 
 type PostgresLedgerRepository struct {
 	transactions *PostgresTransactionRepository
 	budgets      *PostgresBudgetRepository
-	reports      *storage.InMemoryLedgerStorage
+	reports      *PostgresReportRepository
 }
 
 func NewPostgresLedgerRepository(db *pgxpool.Pool) *PostgresLedgerRepository {
 	return &PostgresLedgerRepository{
 		transactions: NewPostgresTransactionRepository(db),
 		budgets:      NewPostgresBudgetRepository(db),
-		reports:      storage.NewInMemoryLedgerStorage(),
+		reports:      NewPostgresReportRepository(db),
 	}
 }
 
@@ -62,7 +61,7 @@ func (r *PostgresLedgerRepository) ListBudgets() []model.Budget {
 }
 
 func (r *PostgresLedgerRepository) CreateReport(report model.Report) (model.Report, error) {
-	return r.reports.CreateReport(report), nil
+	return r.reports.CreateReport(report)
 }
 
 func (r *PostgresLedgerRepository) GetReport(id string) (model.Report, error) {
