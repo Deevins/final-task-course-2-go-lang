@@ -425,6 +425,14 @@ func buildReportSummary(transactions []model.Transaction, budgets []model.Budget
 }
 
 func findBudgetAmount(budgets []model.Budget, category, currency string, start, end time.Time) float64 {
+	// Business logic: budget amounts are prorated by overlapping calendar days
+	// between the report period and each monthly budget (inclusive boundaries).
+	startDate := dateOnly(start)
+	endDate := dateOnly(end)
+	if endDate.Before(startDate) {
+		return 0
+	}
+	total := 0.0
 	for _, budget := range budgets {
 		if budget.Name != category {
 			continue
@@ -432,13 +440,21 @@ func findBudgetAmount(budgets []model.Budget, category, currency string, start, 
 		if currency != "" && budget.Currency != currency {
 			continue
 		}
-		budgetStart, budgetEnd := monthRange(budget.Month)
-		if !periodsOverlap(budgetStart, budgetEnd, start, end) {
+		budgetStart, budgetEnd := monthDateRange(budget.Month)
+		if endDate.Before(budgetStart) || budgetEnd.Before(startDate) {
 			continue
 		}
-		return budget.Amount
+		// Business logic: compute inclusive overlap days and prorate by days in month.
+		overlapStart := maxDate(startDate, budgetStart)
+		overlapEnd := minDate(endDate, budgetEnd)
+		overlapDays := int(overlapEnd.Sub(overlapStart).Hours()/24) + 1
+		monthDays := budgetEnd.Day()
+		if monthDays <= 0 || overlapDays <= 0 {
+			continue
+		}
+		total += budget.Amount * (float64(overlapDays) / float64(monthDays))
 	}
-	return 0
+	return total
 }
 
 func periodsOverlap(startA, endA, startB, endB time.Time) bool {
@@ -500,6 +516,32 @@ func monthRange(month time.Time) (time.Time, time.Time) {
 	start := time.Date(month.Year(), month.Month(), 1, 0, 0, 0, 0, time.UTC)
 	end := start.AddDate(0, 1, 0).Add(-time.Nanosecond)
 	return start, end
+}
+
+func monthDateRange(month time.Time) (time.Time, time.Time) {
+	month = month.UTC()
+	start := time.Date(month.Year(), month.Month(), 1, 0, 0, 0, 0, time.UTC)
+	end := time.Date(month.Year(), month.Month()+1, 0, 0, 0, 0, 0, time.UTC)
+	return start, end
+}
+
+func dateOnly(value time.Time) time.Time {
+	value = value.UTC()
+	return time.Date(value.Year(), value.Month(), value.Day(), 0, 0, 0, 0, time.UTC)
+}
+
+func maxDate(a, b time.Time) time.Time {
+	if a.After(b) {
+		return a
+	}
+	return b
+}
+
+func minDate(a, b time.Time) time.Time {
+	if a.Before(b) {
+		return a
+	}
+	return b
 }
 
 func parseTimestamp(value string) (time.Time, error) {
