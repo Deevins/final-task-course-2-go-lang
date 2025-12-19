@@ -5,76 +5,76 @@ package v1
 
 import "google.golang.org/protobuf/types/known/timestamppb"
 
-type RegisterRequest struct {
+type SignUpRequest struct {
 	Email    string
 	Password string
 	Name     string
 }
 
-func (x *RegisterRequest) GetEmail() string {
+func (x *SignUpRequest) GetEmail() string {
 	if x != nil {
 		return x.Email
 	}
 	return ""
 }
 
-func (x *RegisterRequest) GetPassword() string {
+func (x *SignUpRequest) GetPassword() string {
 	if x != nil {
 		return x.Password
 	}
 	return ""
 }
 
-func (x *RegisterRequest) GetName() string {
+func (x *SignUpRequest) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
-type RegisterResponse struct {
+type SignUpResponse struct {
 	UserId string
 }
 
-func (x *RegisterResponse) GetUserId() string {
+func (x *SignUpResponse) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
 	return ""
 }
 
-type LoginRequest struct {
+type SignInRequest struct {
 	Email    string
 	Password string
 }
 
-func (x *LoginRequest) GetEmail() string {
+func (x *SignInRequest) GetEmail() string {
 	if x != nil {
 		return x.Email
 	}
 	return ""
 }
 
-func (x *LoginRequest) GetPassword() string {
+func (x *SignInRequest) GetPassword() string {
 	if x != nil {
 		return x.Password
 	}
 	return ""
 }
 
-type LoginResponse struct {
+type SignInResponse struct {
 	AccessToken string
 	ExpiresAt   *timestamppb.Timestamp
 }
 
-func (x *LoginResponse) GetAccessToken() string {
+func (x *SignInResponse) GetAccessToken() string {
 	if x != nil {
 		return x.AccessToken
 	}
 	return ""
 }
 
-func (x *LoginResponse) GetExpiresAt() *timestamppb.Timestamp {
+func (x *SignInResponse) GetExpiresAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.ExpiresAt
 	}

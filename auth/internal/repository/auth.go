@@ -9,8 +9,6 @@ type AuthRepository interface {
 	CreateUser(user model.User) (model.User, error)
 	GetUserByEmail(email string) (model.User, error)
 	GetUserByID(id string) (model.User, error)
-	StoreToken(token model.Token)
-	GetToken(accessToken string) (model.Token, error)
 }
 
 type InMemoryAuthRepository struct {
@@ -31,12 +29,4 @@ func (r *InMemoryAuthRepository) GetUserByEmail(email string) (model.User, error
 
 func (r *InMemoryAuthRepository) GetUserByID(id string) (model.User, error) {
 	return r.store.GetUserByID(id)
-}
-
-func (r *InMemoryAuthRepository) StoreToken(token model.Token) {
-	r.store.StoreToken(token)
-}
-
-func (r *InMemoryAuthRepository) GetToken(accessToken string) (model.Token, error) {
-	return r.store.GetToken(accessToken)
 }

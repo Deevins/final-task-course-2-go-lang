@@ -15,6 +15,7 @@ import (
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 
+	"github.com/Deevins/final-task-course-2-go-lang/auth/internal/config"
 	"github.com/Deevins/final-task-course-2-go-lang/auth/internal/grpcserver"
 	httpHandler "github.com/Deevins/final-task-course-2-go-lang/auth/internal/handler/http"
 	pb "github.com/Deevins/final-task-course-2-go-lang/auth/internal/pb/auth/v1"
@@ -29,9 +30,14 @@ func main() {
 
 	r := gin.Default()
 
+	jwtConfig, err := config.LoadJWTConfig()
+	if err != nil {
+		log.Fatalf("load JWT config: %v", err)
+	}
+
 	store := storage.NewInMemoryAuthStorage()
 	repo := repository.NewInMemoryAuthRepository(store)
-	authService := service.NewAuthService(repo)
+	authService := service.NewAuthService(repo, jwtConfig)
 
 	healthHandler := httpHandler.NewHealthHandler()
 	api := r.Group("/api/v1")

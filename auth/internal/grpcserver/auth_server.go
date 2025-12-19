@@ -22,7 +22,7 @@ func NewAuthServer(svc service.AuthService) *AuthServer {
 	return &AuthServer{authService: svc}
 }
 
-func (s *AuthServer) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
+func (s *AuthServer) SignUp(ctx context.Context, req *pb.SignUpRequest) (*pb.SignUpResponse, error) {
 	if req.GetEmail() == "" || req.GetPassword() == "" {
 		return nil, status.Error(codes.InvalidArgument, "email and password are required")
 	}
@@ -35,10 +35,10 @@ func (s *AuthServer) Register(ctx context.Context, req *pb.RegisterRequest) (*pb
 		return nil, status.Errorf(codes.Internal, "register: %v", err)
 	}
 
-	return &pb.RegisterResponse{UserId: user.ID}, nil
+	return &pb.SignUpResponse{UserId: user.ID}, nil
 }
 
-func (s *AuthServer) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
+func (s *AuthServer) SignIn(ctx context.Context, req *pb.SignInRequest) (*pb.SignInResponse, error) {
 	if req.GetEmail() == "" || req.GetPassword() == "" {
 		return nil, status.Error(codes.InvalidArgument, "email and password are required")
 	}
@@ -54,7 +54,7 @@ func (s *AuthServer) Login(ctx context.Context, req *pb.LoginRequest) (*pb.Login
 		return nil, status.Errorf(codes.Internal, "login: %v", err)
 	}
 
-	return &pb.LoginResponse{
+	return &pb.SignInResponse{
 		AccessToken: token.AccessToken,
 		ExpiresAt:   timestamppb.New(token.ExpiresAt),
 	}, nil

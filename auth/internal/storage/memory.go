@@ -16,14 +16,12 @@ type InMemoryAuthStorage struct {
 	mu           sync.RWMutex
 	usersByID    map[string]model.User
 	usersByEmail map[string]string
-	tokens       map[string]model.Token
 }
 
 func NewInMemoryAuthStorage() *InMemoryAuthStorage {
 	return &InMemoryAuthStorage{
 		usersByID:    make(map[string]model.User),
 		usersByEmail: make(map[string]string),
-		tokens:       make(map[string]model.Token),
 	}
 }
 
@@ -60,20 +58,4 @@ func (s *InMemoryAuthStorage) GetUserByID(id string) (model.User, error) {
 		return model.User{}, ErrNotFound
 	}
 	return user, nil
-}
-
-func (s *InMemoryAuthStorage) StoreToken(token model.Token) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	s.tokens[token.AccessToken] = token
-}
-
-func (s *InMemoryAuthStorage) GetToken(accessToken string) (model.Token, error) {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-	token, ok := s.tokens[accessToken]
-	if !ok {
-		return model.Token{}, ErrNotFound
-	}
-	return token, nil
 }
