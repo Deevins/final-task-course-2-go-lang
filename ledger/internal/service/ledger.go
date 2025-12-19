@@ -34,16 +34,16 @@ type LedgerService interface {
 	ListTransactions(accountID string) []model.Transaction
 
 	CreateBudget(budget model.Budget) (model.Budget, error)
-	GetBudget(id string) (model.Budget, error)
+	GetBudget(accountID, id string) (model.Budget, error)
 	UpdateBudget(budget model.Budget) (model.Budget, error)
-	DeleteBudget(id string) error
-	ListBudgets() []model.Budget
+	DeleteBudget(accountID, id string) error
+	ListBudgets(accountID string) []model.Budget
 
 	CreateReport(report model.Report) (model.Report, error)
-	GetReport(id string) (model.Report, error)
+	GetReport(accountID, id string) (model.Report, error)
 	UpdateReport(report model.Report) (model.Report, error)
-	DeleteReport(id string) error
-	ListReports() []model.Report
+	DeleteReport(accountID, id string) error
+	ListReports(accountID string) []model.Report
 
 	ImportTransactionsCSV(csvContent []byte, hasHeader bool) (int, error)
 	ExportTransactionsCSV(accountID string) ([]byte, error)
@@ -119,12 +119,12 @@ func (s *DefaultLedgerService) CreateBudget(budget model.Budget) (model.Budget, 
 	return s.repo.CreateBudget(budget)
 }
 
-func (s *DefaultLedgerService) GetBudget(id string) (model.Budget, error) {
-	return s.repo.GetBudget(id)
+func (s *DefaultLedgerService) GetBudget(accountID, id string) (model.Budget, error) {
+	return s.repo.GetBudget(accountID, id)
 }
 
 func (s *DefaultLedgerService) UpdateBudget(budget model.Budget) (model.Budget, error) {
-	current, err := s.repo.GetBudget(budget.ID)
+	current, err := s.repo.GetBudget(budget.AccountID, budget.ID)
 	if err != nil {
 		return model.Budget{}, err
 	}
@@ -139,12 +139,12 @@ func (s *DefaultLedgerService) UpdateBudget(budget model.Budget) (model.Budget, 
 	return s.repo.UpdateBudget(budget)
 }
 
-func (s *DefaultLedgerService) DeleteBudget(id string) error {
-	return s.repo.DeleteBudget(id)
+func (s *DefaultLedgerService) DeleteBudget(accountID, id string) error {
+	return s.repo.DeleteBudget(accountID, id)
 }
 
-func (s *DefaultLedgerService) ListBudgets() []model.Budget {
-	return s.repo.ListBudgets()
+func (s *DefaultLedgerService) ListBudgets(accountID string) []model.Budget {
+	return s.repo.ListBudgets(accountID)
 }
 
 func (s *DefaultLedgerService) CreateReport(report model.Report) (model.Report, error) {
@@ -159,8 +159,8 @@ func (s *DefaultLedgerService) CreateReport(report model.Report) (model.Report, 
 	if err != nil {
 		return model.Report{}, err
 	}
-	transactions := s.repo.ListTransactions()
-	budgets := s.repo.ListBudgets()
+	transactions := s.ListTransactions(report.AccountID)
+	budgets := s.ListBudgets(report.AccountID)
 	reportTotals := buildReportSummary(transactions, budgets, start, end, report.Currency)
 	report.TotalIncome = reportTotals.TotalIncome
 	report.TotalExpense = reportTotals.TotalExpense
@@ -174,17 +174,20 @@ func (s *DefaultLedgerService) CreateReport(report model.Report) (model.Report, 
 	return created, nil
 }
 
-func (s *DefaultLedgerService) GetReport(id string) (model.Report, error) {
+func (s *DefaultLedgerService) GetReport(accountID, id string) (model.Report, error) {
 	if s.cache != nil {
 		cached, err := s.cache.GetReport(context.Background(), id)
 		if err == nil {
+			if cached.AccountID != "" && cached.AccountID != accountID {
+				return model.Report{}, storage.ErrNotFound
+			}
 			return cached, nil
 		}
 		if err != storage.ErrNotFound {
 			return model.Report{}, err
 		}
 	}
-	report, err := s.repo.GetReport(id)
+	report, err := s.repo.GetReport(accountID, id)
 	if err != nil {
 		return model.Report{}, err
 	}
@@ -193,7 +196,7 @@ func (s *DefaultLedgerService) GetReport(id string) (model.Report, error) {
 }
 
 func (s *DefaultLedgerService) UpdateReport(report model.Report) (model.Report, error) {
-	current, err := s.repo.GetReport(report.ID)
+	current, err := s.repo.GetReport(report.AccountID, report.ID)
 	if err != nil {
 		return model.Report{}, err
 	}
@@ -210,8 +213,8 @@ func (s *DefaultLedgerService) UpdateReport(report model.Report) (model.Report, 
 	if err != nil {
 		return model.Report{}, err
 	}
-	transactions := s.repo.ListTransactions()
-	budgets := s.repo.ListBudgets()
+	transactions := s.ListTransactions(report.AccountID)
+	budgets := s.ListBudgets(report.AccountID)
 	reportTotals := buildReportSummary(transactions, budgets, start, end, report.Currency)
 	report.TotalIncome = reportTotals.TotalIncome
 	report.TotalExpense = reportTotals.TotalExpense
@@ -225,16 +228,16 @@ func (s *DefaultLedgerService) UpdateReport(report model.Report) (model.Report, 
 	return updated, nil
 }
 
-func (s *DefaultLedgerService) DeleteReport(id string) error {
-	if err := s.repo.DeleteReport(id); err != nil {
+func (s *DefaultLedgerService) DeleteReport(accountID, id string) error {
+	if err := s.repo.DeleteReport(accountID, id); err != nil {
 		return err
 	}
 	s.invalidateReportCache(id)
 	return nil
 }
 
-func (s *DefaultLedgerService) ListReports() []model.Report {
-	return s.repo.ListReports()
+func (s *DefaultLedgerService) ListReports(accountID string) []model.Report {
+	return s.repo.ListReports(accountID)
 }
 
 func (s *DefaultLedgerService) ImportTransactionsCSV(csvContent []byte, hasHeader bool) (int, error) {
@@ -310,12 +313,12 @@ func (s *DefaultLedgerService) ensureBudgetAvailable(tx model.Transaction) error
 	if tx.Amount >= 0 {
 		return nil
 	}
-	budgets := s.repo.ListBudgets()
+	budgets := s.repo.ListBudgets(tx.AccountID)
 	if len(budgets) == 0 {
 		return nil
 	}
 	expense := -tx.Amount
-	transactions := s.repo.ListTransactions()
+	transactions := s.ListTransactions(tx.AccountID)
 	for _, budget := range budgets {
 		if budget.Currency != tx.Currency {
 			continue

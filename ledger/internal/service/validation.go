@@ -53,11 +53,14 @@ func (s *ValidationService) CreateBudget(budget model.Budget) (model.Budget, err
 	return s.next.CreateBudget(budget)
 }
 
-func (s *ValidationService) GetBudget(id string) (model.Budget, error) {
+func (s *ValidationService) GetBudget(accountID, id string) (model.Budget, error) {
+	if accountID == "" {
+		return model.Budget{}, fmt.Errorf("%w: account id is required", ErrValidation)
+	}
 	if id == "" {
 		return model.Budget{}, fmt.Errorf("%w: budget id is required", ErrValidation)
 	}
-	return s.next.GetBudget(id)
+	return s.next.GetBudget(accountID, id)
 }
 
 func (s *ValidationService) UpdateBudget(budget model.Budget) (model.Budget, error) {
@@ -67,18 +70,24 @@ func (s *ValidationService) UpdateBudget(budget model.Budget) (model.Budget, err
 	return s.next.UpdateBudget(budget)
 }
 
-func (s *ValidationService) DeleteBudget(id string) error {
+func (s *ValidationService) DeleteBudget(accountID, id string) error {
+	if accountID == "" {
+		return fmt.Errorf("%w: account id is required", ErrValidation)
+	}
 	if id == "" {
 		return fmt.Errorf("%w: budget id is required", ErrValidation)
 	}
-	return s.next.DeleteBudget(id)
+	return s.next.DeleteBudget(accountID, id)
 }
 
-func (s *ValidationService) ListBudgets() []model.Budget {
-	return s.next.ListBudgets()
+func (s *ValidationService) ListBudgets(accountID string) []model.Budget {
+	return s.next.ListBudgets(accountID)
 }
 
 func (s *ValidationService) CreateReport(report model.Report) (model.Report, error) {
+	if report.AccountID == "" {
+		return model.Report{}, fmt.Errorf("%w: account id is required", ErrValidation)
+	}
 	if report.Period == "" {
 		return model.Report{}, fmt.Errorf("%w: period is required", ErrValidation)
 	}
@@ -88,16 +97,22 @@ func (s *ValidationService) CreateReport(report model.Report) (model.Report, err
 	return s.next.CreateReport(report)
 }
 
-func (s *ValidationService) GetReport(id string) (model.Report, error) {
+func (s *ValidationService) GetReport(accountID, id string) (model.Report, error) {
+	if accountID == "" {
+		return model.Report{}, fmt.Errorf("%w: account id is required", ErrValidation)
+	}
 	if id == "" {
 		return model.Report{}, fmt.Errorf("%w: report id is required", ErrValidation)
 	}
-	return s.next.GetReport(id)
+	return s.next.GetReport(accountID, id)
 }
 
 func (s *ValidationService) UpdateReport(report model.Report) (model.Report, error) {
 	if report.ID == "" {
 		return model.Report{}, fmt.Errorf("%w: report id is required", ErrValidation)
+	}
+	if report.AccountID == "" {
+		return model.Report{}, fmt.Errorf("%w: account id is required", ErrValidation)
 	}
 	if report.Period == "" {
 		return model.Report{}, fmt.Errorf("%w: period is required", ErrValidation)
@@ -108,15 +123,18 @@ func (s *ValidationService) UpdateReport(report model.Report) (model.Report, err
 	return s.next.UpdateReport(report)
 }
 
-func (s *ValidationService) DeleteReport(id string) error {
+func (s *ValidationService) DeleteReport(accountID, id string) error {
+	if accountID == "" {
+		return fmt.Errorf("%w: account id is required", ErrValidation)
+	}
 	if id == "" {
 		return fmt.Errorf("%w: report id is required", ErrValidation)
 	}
-	return s.next.DeleteReport(id)
+	return s.next.DeleteReport(accountID, id)
 }
 
-func (s *ValidationService) ListReports() []model.Report {
-	return s.next.ListReports()
+func (s *ValidationService) ListReports(accountID string) []model.Report {
+	return s.next.ListReports(accountID)
 }
 
 func (s *ValidationService) ImportTransactionsCSV(csvContent []byte, hasHeader bool) (int, error) {
@@ -152,6 +170,9 @@ func validateTransaction(tx model.Transaction, requireID bool) error {
 func validateBudget(budget model.Budget, requireID bool) error {
 	if requireID && budget.ID == "" {
 		return fmt.Errorf("%w: budget id is required", ErrValidation)
+	}
+	if budget.AccountID == "" {
+		return fmt.Errorf("%w: account id is required", ErrValidation)
 	}
 	if budget.Name == "" {
 		return fmt.Errorf("%w: budget name is required", ErrValidation)

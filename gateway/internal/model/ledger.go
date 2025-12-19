@@ -38,6 +38,7 @@ type UpdateTransactionRequest struct {
 // Budget описывает бюджет.
 type Budget struct {
 	ID        string    `json:"id" example:"11111111-1111-1111-1111-111111111111"`
+	AccountID string    `json:"account_id" example:"22222222-2222-2222-2222-222222222222"`
 	Name      string    `json:"name" example:"Еда"`
 	Amount    float64   `json:"amount" example:"10000"`
 	Currency  string    `json:"currency" example:"RUB"`
@@ -71,6 +72,7 @@ type UpdateBudgetRequest struct {
 // Report описывает отчет.
 type Report struct {
 	ID           string    `json:"id" example:"11111111-1111-1111-1111-111111111111"`
+	AccountID    string    `json:"account_id" example:"22222222-2222-2222-2222-222222222222"`
 	Name         string    `json:"name" example:"Январь 2024"`
 	Period       string    `json:"period" example:"2024-01/2024-01-31"`
 	GeneratedAt  time.Time `json:"generated_at" example:"2024-01-31T23:59:59Z"`

@@ -16,6 +16,7 @@ type Transaction struct {
 
 type Budget struct {
 	ID        string
+	AccountID string
 	Name      string
 	Amount    float64
 	Currency  string
@@ -28,6 +29,7 @@ type Budget struct {
 
 type Report struct {
 	ID           string
+	AccountID    string
 	Name         string
 	Period       string
 	GeneratedAt  time.Time

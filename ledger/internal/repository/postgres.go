@@ -22,18 +22,18 @@ type TransactionRepository interface {
 
 type BudgetRepository interface {
 	CreateBudget(budget model.Budget) (model.Budget, error)
-	GetBudget(id string) (model.Budget, error)
+	GetBudget(accountID, id string) (model.Budget, error)
 	UpdateBudget(budget model.Budget) (model.Budget, error)
-	DeleteBudget(id string) error
-	ListBudgets() []model.Budget
+	DeleteBudget(accountID, id string) error
+	ListBudgets(accountID string) []model.Budget
 }
 
 type ReportRepository interface {
 	CreateReport(report model.Report) (model.Report, error)
-	GetReport(id string) (model.Report, error)
+	GetReport(accountID, id string) (model.Report, error)
 	UpdateReport(report model.Report) (model.Report, error)
-	DeleteReport(id string) error
-	ListReports() []model.Report
+	DeleteReport(accountID, id string) error
+	ListReports(accountID string) []model.Report
 }
 
 type PostgresTransactionRepository struct {
@@ -152,23 +152,24 @@ func NewPostgresBudgetRepository(db *pgxpool.Pool) *PostgresBudgetRepository {
 
 func (r *PostgresBudgetRepository) CreateBudget(budget model.Budget) (model.Budget, error) {
 	const query = `
-		INSERT INTO budgets (id, name, amount, currency, period, start_date, end_date, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
-	_, err := r.db.Exec(context.Background(), query, budget.ID, budget.Name, budget.Amount, budget.Currency, budget.Period, budget.StartDate, budget.EndDate, budget.CreatedAt, budget.UpdatedAt)
+		INSERT INTO budgets (id, account_id, name, amount, currency, period, start_date, end_date, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
+	_, err := r.db.Exec(context.Background(), query, budget.ID, budget.AccountID, budget.Name, budget.Amount, budget.Currency, budget.Period, budget.StartDate, budget.EndDate, budget.CreatedAt, budget.UpdatedAt)
 	if err != nil {
 		return model.Budget{}, err
 	}
 	return budget, nil
 }
 
-func (r *PostgresBudgetRepository) GetBudget(id string) (model.Budget, error) {
+func (r *PostgresBudgetRepository) GetBudget(accountID, id string) (model.Budget, error) {
 	const query = `
-		SELECT id, name, amount, currency, period, start_date, end_date, created_at, updated_at
+		SELECT id, account_id, name, amount, currency, period, start_date, end_date, created_at, updated_at
 		FROM budgets
-		WHERE id = $1`
+		WHERE id = $1 AND account_id = $2`
 	var budget model.Budget
-	err := r.db.QueryRow(context.Background(), query, id).Scan(
+	err := r.db.QueryRow(context.Background(), query, id, accountID).Scan(
 		&budget.ID,
+		&budget.AccountID,
 		&budget.Name,
 		&budget.Amount,
 		&budget.Currency,
@@ -190,9 +191,9 @@ func (r *PostgresBudgetRepository) GetBudget(id string) (model.Budget, error) {
 func (r *PostgresBudgetRepository) UpdateBudget(budget model.Budget) (model.Budget, error) {
 	const query = `
 		UPDATE budgets
-		SET name = $2, amount = $3, currency = $4, period = $5, start_date = $6, end_date = $7, created_at = $8, updated_at = $9
-		WHERE id = $1`
-	result, err := r.db.Exec(context.Background(), query, budget.ID, budget.Name, budget.Amount, budget.Currency, budget.Period, budget.StartDate, budget.EndDate, budget.CreatedAt, budget.UpdatedAt)
+		SET name = $3, amount = $4, currency = $5, period = $6, start_date = $7, end_date = $8, created_at = $9, updated_at = $10
+		WHERE id = $1 AND account_id = $2`
+	result, err := r.db.Exec(context.Background(), query, budget.ID, budget.AccountID, budget.Name, budget.Amount, budget.Currency, budget.Period, budget.StartDate, budget.EndDate, budget.CreatedAt, budget.UpdatedAt)
 	if err != nil {
 		return model.Budget{}, err
 	}
@@ -202,9 +203,9 @@ func (r *PostgresBudgetRepository) UpdateBudget(budget model.Budget) (model.Budg
 	return budget, nil
 }
 
-func (r *PostgresBudgetRepository) DeleteBudget(id string) error {
-	const query = `DELETE FROM budgets WHERE id = $1`
-	result, err := r.db.Exec(context.Background(), query, id)
+func (r *PostgresBudgetRepository) DeleteBudget(accountID, id string) error {
+	const query = `DELETE FROM budgets WHERE id = $1 AND account_id = $2`
+	result, err := r.db.Exec(context.Background(), query, id, accountID)
 	if err != nil {
 		return err
 	}
@@ -214,11 +215,12 @@ func (r *PostgresBudgetRepository) DeleteBudget(id string) error {
 	return nil
 }
 
-func (r *PostgresBudgetRepository) ListBudgets() []model.Budget {
+func (r *PostgresBudgetRepository) ListBudgets(accountID string) []model.Budget {
 	const query = `
-		SELECT id, name, amount, currency, period, start_date, end_date, created_at, updated_at
-		FROM budgets`
-	rows, err := r.db.Query(context.Background(), query)
+		SELECT id, account_id, name, amount, currency, period, start_date, end_date, created_at, updated_at
+		FROM budgets
+		WHERE account_id = $1`
+	rows, err := r.db.Query(context.Background(), query, accountID)
 	if err != nil {
 		return nil
 	}
@@ -229,6 +231,7 @@ func (r *PostgresBudgetRepository) ListBudgets() []model.Budget {
 		var budget model.Budget
 		if err := rows.Scan(
 			&budget.ID,
+			&budget.AccountID,
 			&budget.Name,
 			&budget.Amount,
 			&budget.Currency,
@@ -258,8 +261,8 @@ func NewPostgresReportRepository(db *pgxpool.Pool) *PostgresReportRepository {
 
 func (r *PostgresReportRepository) CreateReport(report model.Report) (model.Report, error) {
 	const query = `
-		INSERT INTO reports (id, name, period, generated_at, total_income, total_expense, currency, categories)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
+		INSERT INTO reports (id, account_id, name, period, generated_at, total_income, total_expense, currency, categories)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
 	categories, err := json.Marshal(report.Categories)
 	if err != nil {
 		return model.Report{}, err
@@ -268,6 +271,7 @@ func (r *PostgresReportRepository) CreateReport(report model.Report) (model.Repo
 		context.Background(),
 		query,
 		report.ID,
+		report.AccountID,
 		report.Name,
 		report.Period,
 		report.GeneratedAt,
@@ -282,15 +286,16 @@ func (r *PostgresReportRepository) CreateReport(report model.Report) (model.Repo
 	return report, nil
 }
 
-func (r *PostgresReportRepository) GetReport(id string) (model.Report, error) {
+func (r *PostgresReportRepository) GetReport(accountID, id string) (model.Report, error) {
 	const query = `
-		SELECT id, name, period, generated_at, total_income, total_expense, currency, categories
+		SELECT id, account_id, name, period, generated_at, total_income, total_expense, currency, categories
 		FROM reports
-		WHERE id = $1`
+		WHERE id = $1 AND account_id = $2`
 	var report model.Report
 	var categories []byte
-	err := r.db.QueryRow(context.Background(), query, id).Scan(
+	err := r.db.QueryRow(context.Background(), query, id, accountID).Scan(
 		&report.ID,
+		&report.AccountID,
 		&report.Name,
 		&report.Period,
 		&report.GeneratedAt,
@@ -316,8 +321,8 @@ func (r *PostgresReportRepository) GetReport(id string) (model.Report, error) {
 func (r *PostgresReportRepository) UpdateReport(report model.Report) (model.Report, error) {
 	const query = `
 		UPDATE reports
-		SET name = $2, period = $3, generated_at = $4, total_income = $5, total_expense = $6, currency = $7, categories = $8
-		WHERE id = $1`
+		SET name = $3, period = $4, generated_at = $5, total_income = $6, total_expense = $7, currency = $8, categories = $9
+		WHERE id = $1 AND account_id = $2`
 	categories, err := json.Marshal(report.Categories)
 	if err != nil {
 		return model.Report{}, err
@@ -326,6 +331,7 @@ func (r *PostgresReportRepository) UpdateReport(report model.Report) (model.Repo
 		context.Background(),
 		query,
 		report.ID,
+		report.AccountID,
 		report.Name,
 		report.Period,
 		report.GeneratedAt,
@@ -343,9 +349,9 @@ func (r *PostgresReportRepository) UpdateReport(report model.Report) (model.Repo
 	return report, nil
 }
 
-func (r *PostgresReportRepository) DeleteReport(id string) error {
-	const query = `DELETE FROM reports WHERE id = $1`
-	result, err := r.db.Exec(context.Background(), query, id)
+func (r *PostgresReportRepository) DeleteReport(accountID, id string) error {
+	const query = `DELETE FROM reports WHERE id = $1 AND account_id = $2`
+	result, err := r.db.Exec(context.Background(), query, id, accountID)
 	if err != nil {
 		return err
 	}
@@ -355,11 +361,12 @@ func (r *PostgresReportRepository) DeleteReport(id string) error {
 	return nil
 }
 
-func (r *PostgresReportRepository) ListReports() []model.Report {
+func (r *PostgresReportRepository) ListReports(accountID string) []model.Report {
 	const query = `
-		SELECT id, name, period, generated_at, total_income, total_expense, currency, categories
-		FROM reports`
-	rows, err := r.db.Query(context.Background(), query)
+		SELECT id, account_id, name, period, generated_at, total_income, total_expense, currency, categories
+		FROM reports
+		WHERE account_id = $1`
+	rows, err := r.db.Query(context.Background(), query, accountID)
 	if err != nil {
 		return nil
 	}
@@ -371,6 +378,7 @@ func (r *PostgresReportRepository) ListReports() []model.Report {
 		var categories []byte
 		if err := rows.Scan(
 			&report.ID,
+			&report.AccountID,
 			&report.Name,
 			&report.Period,
 			&report.GeneratedAt,

@@ -20,24 +20,26 @@ message Transaction {
 
 message Budget {
   string id = 1;
-  string name = 2;
-  double amount = 3;
-  string currency = 4;
-  string period = 5;
-  google.protobuf.Timestamp start_date = 6;
-  google.protobuf.Timestamp end_date = 7;
-  google.protobuf.Timestamp created_at = 8;
-  google.protobuf.Timestamp updated_at = 9;
+  string account_id = 2;
+  string name = 3;
+  double amount = 4;
+  string currency = 5;
+  string period = 6;
+  google.protobuf.Timestamp start_date = 7;
+  google.protobuf.Timestamp end_date = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
 }
 
 message Report {
   string id = 1;
-  string name = 2;
-  string period = 3;
-  google.protobuf.Timestamp generated_at = 4;
-  double total_income = 5;
-  double total_expense = 6;
-  string currency = 7;
+  string account_id = 2;
+  string name = 3;
+  string period = 4;
+  google.protobuf.Timestamp generated_at = 5;
+  double total_income = 6;
+  double total_expense = 7;
+  string currency = 8;
 }
 
 message CreateTransactionRequest {
@@ -81,6 +83,7 @@ message CreateBudgetRequest {
 
 message GetBudgetRequest {
   string id = 1;
+  string account_id = 2;
 }
 
 message UpdateBudgetRequest {
@@ -89,11 +92,13 @@ message UpdateBudgetRequest {
 
 message DeleteBudgetRequest {
   string id = 1;
+  string account_id = 2;
 }
 
 message ListBudgetsRequest {
-  int32 limit = 1;
-  string page_token = 2;
+  string account_id = 1;
+  int32 limit = 2;
+  string page_token = 3;
 }
 
 message ListBudgetsResponse {
@@ -111,6 +116,7 @@ message CreateReportRequest {
 
 message GetReportRequest {
   string id = 1;
+  string account_id = 2;
 }
 
 message UpdateReportRequest {
@@ -119,11 +125,13 @@ message UpdateReportRequest {
 
 message DeleteReportRequest {
   string id = 1;
+  string account_id = 2;
 }
 
 message ListReportsRequest {
-  int32 limit = 1;
-  string page_token = 2;
+  string account_id = 1;
+  int32 limit = 2;
+  string page_token = 3;
 }
 
 message ListReportsResponse {
