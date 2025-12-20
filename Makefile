@@ -21,7 +21,7 @@ migrate-auth:
 	$(COMPOSE) run --rm auth sh -c "go install github.com/pressly/goose/v3/cmd/goose@latest && goose -dir /app/auth/migrations postgres \"$(AUTH_POSTGRES_DSN)\" up"
 
 migrate-ledger: wait-ledger-db
-	$(COMPOSE) run --rm ledger sh -c "go install github.com/pressly/goose/v3/cmd/goose@latest && tr -d '\r' < /app/ledger/scripts/migrate.sh > /tmp/migrate.sh && chmod +x /tmp/migrate.sh && POSTGRES_DSN=$(LEDGER_POSTGRES_DSN) /tmp/migrate.sh"
+	$(COMPOSE) run --rm ledger sh -c "go install github.com/pressly/goose/v3/cmd/goose@latest && tr -d '\r' < /app/ledger/scripts/migrate.sh > /tmp/migrate.sh && chmod +x /tmp/migrate.sh && POSTGRES_DSN=$(LEDGER_POSTGRES_DSN) MIGRATIONS_DIR=/app/ledger/migrations /tmp/migrate.sh"
 
 
 wait-ledger-db:
