@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -31,7 +32,7 @@ func (c *ReportCache) GetReport(ctx context.Context, id string) (model.Report, e
 	}
 	value, err := c.client.Get(ctx, reportCacheKey(id)).Result()
 	if err != nil {
-		if err == redis.Nil {
+		if errors.Is(err, redis.Nil) {
 			return model.Report{}, ErrNotFound
 		}
 		return model.Report{}, fmt.Errorf("get report cache: %w", err)
