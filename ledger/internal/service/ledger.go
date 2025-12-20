@@ -12,6 +12,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/Deevins/final-task-course-2-go-lang/ledger/internal/cache"
 	"github.com/Deevins/final-task-course-2-go-lang/ledger/internal/model"
 	"github.com/Deevins/final-task-course-2-go-lang/ledger/internal/repository"
 	"github.com/Deevins/final-task-course-2-go-lang/ledger/internal/storage"
@@ -47,15 +48,29 @@ type LedgerService interface {
 
 	ImportTransactionsCSV(ctx context.Context, accountID string, csvContent []byte, hasHeader bool) (int, error)
 	ExportTransactionsCSV(ctx context.Context, accountID string) ([]byte, error)
+
+	GetReportSummary(ctx context.Context, accountID string, from, to time.Time) (model.ReportSummary, error)
 }
 
 type DefaultLedgerService struct {
-	repo  repository.LedgerRepository
-	cache *storage.ReportCache
+	repo               repository.LedgerRepository
+	cache              *storage.ReportCache
+	reportSummaryCache cache.ReportSummaryCache
+	budgetListCache    cache.BudgetListCache
 }
 
-func NewLedgerService(repo repository.LedgerRepository, cache *storage.ReportCache) *DefaultLedgerService {
-	return &DefaultLedgerService{repo: repo, cache: cache}
+func NewLedgerService(
+	repo repository.LedgerRepository,
+	reportCache *storage.ReportCache,
+	reportSummaryCache cache.ReportSummaryCache,
+	budgetListCache cache.BudgetListCache,
+) *DefaultLedgerService {
+	return &DefaultLedgerService{
+		repo:               repo,
+		cache:              reportCache,
+		reportSummaryCache: reportSummaryCache,
+		budgetListCache:    budgetListCache,
+	}
 }
 
 func (s *DefaultLedgerService) CreateTransaction(ctx context.Context, tx model.Transaction) (model.Transaction, error) {
@@ -116,7 +131,12 @@ func (s *DefaultLedgerService) CreateBudget(ctx context.Context, budget model.Bu
 	}
 	budget.CreatedAt = now
 	budget.UpdatedAt = now
-	return s.repo.CreateBudget(ctx, budget)
+	created, err := s.repo.CreateBudget(ctx, budget)
+	if err != nil {
+		return model.Budget{}, err
+	}
+	s.invalidateBudgetCache(ctx)
+	return created, nil
 }
 
 func (s *DefaultLedgerService) GetBudget(ctx context.Context, accountID, id string) (model.Budget, error) {
@@ -133,15 +153,34 @@ func (s *DefaultLedgerService) UpdateBudget(ctx context.Context, budget model.Bu
 	if budget.Month.IsZero() {
 		budget.Month = current.Month
 	}
-	return s.repo.UpdateBudget(ctx, budget)
+	updated, err := s.repo.UpdateBudget(ctx, budget)
+	if err != nil {
+		return model.Budget{}, err
+	}
+	s.invalidateBudgetCache(ctx)
+	return updated, nil
 }
 
 func (s *DefaultLedgerService) DeleteBudget(ctx context.Context, accountID, id string) error {
-	return s.repo.DeleteBudget(ctx, accountID, id)
+	if err := s.repo.DeleteBudget(ctx, accountID, id); err != nil {
+		return err
+	}
+	s.invalidateBudgetCache(ctx)
+	return nil
 }
 
 func (s *DefaultLedgerService) ListBudgets(ctx context.Context, accountID string) []model.Budget {
-	return s.repo.ListBudgets(ctx, accountID)
+	if s.budgetListCache != nil && accountID != "" {
+		cached, err := s.budgetListCache.GetBudgets(ctx)
+		if err == nil {
+			return cached
+		}
+	}
+	items := s.repo.ListBudgets(ctx, accountID)
+	if s.budgetListCache != nil && accountID != "" {
+		_ = s.budgetListCache.SetBudgets(ctx, items)
+	}
+	return items
 }
 
 func (s *DefaultLedgerService) CreateReport(ctx context.Context, report model.Report) (model.Report, error) {
@@ -306,6 +345,26 @@ func IsNotFound(err error) bool {
 	return err == storage.ErrNotFound
 }
 
+func (s *DefaultLedgerService) GetReportSummary(ctx context.Context, accountID string, from, to time.Time) (model.ReportSummary, error) {
+	cacheKey := reportSummaryCacheKey(from, to)
+	if s.reportSummaryCache != nil {
+		cached, err := s.reportSummaryCache.GetSummary(ctx, cacheKey)
+		if err == nil {
+			return cached, nil
+		}
+		if err != cache.ErrNotFound {
+			return model.ReportSummary{}, err
+		}
+	}
+	transactions := s.ListTransactions(ctx, accountID)
+	budgets := s.ListBudgets(ctx, accountID)
+	summary := buildReportSummary(transactions, budgets, from, to, "")
+	if s.reportSummaryCache != nil {
+		_ = s.reportSummaryCache.SetSummary(ctx, cacheKey, summary)
+	}
+	return summary, nil
+}
+
 func (s *DefaultLedgerService) ensureBudgetAvailable(ctx context.Context, tx model.Transaction) error {
 	if tx.Amount >= 0 {
 		return nil
@@ -368,14 +427,14 @@ func (s *DefaultLedgerService) invalidateReportCache(ctx context.Context, id str
 	_ = s.cache.DeleteReport(ctx, id)
 }
 
-type reportSummary struct {
-	TotalIncome  float64
-	TotalExpense float64
-	Currency     string
-	Categories   []model.ReportCategory
+func (s *DefaultLedgerService) invalidateBudgetCache(ctx context.Context) {
+	if s.budgetListCache == nil {
+		return
+	}
+	_ = s.budgetListCache.DeleteBudgets(ctx)
 }
 
-func buildReportSummary(transactions []model.Transaction, budgets []model.Budget, start, end time.Time, currency string) reportSummary {
+func buildReportSummary(transactions []model.Transaction, budgets []model.Budget, start, end time.Time, currency string) model.ReportSummary {
 	categoryTotals := map[string]float64{}
 	totalIncome := 0.0
 	totalExpense := 0.0
@@ -423,7 +482,7 @@ func buildReportSummary(transactions []model.Transaction, budgets []model.Budget
 		})
 	}
 
-	return reportSummary{
+	return model.ReportSummary{
 		TotalIncome:  totalIncome,
 		TotalExpense: totalExpense,
 		Currency:     resolvedCurrency,
@@ -516,6 +575,11 @@ func parsePeriod(value string) (time.Time, time.Time, error) {
 		return time.Time{}, time.Time{}, fmt.Errorf("%w: period end before start", ErrValidation)
 	}
 	return start, end, nil
+}
+
+func reportSummaryCacheKey(from, to time.Time) string {
+	const layout = "2006-01-02"
+	return fmt.Sprintf("report:summary:%s:%s", from.Format(layout), to.Format(layout))
 }
 
 func monthRange(month time.Time) (time.Time, time.Time) {

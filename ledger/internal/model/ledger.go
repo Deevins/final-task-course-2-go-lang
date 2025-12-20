@@ -45,6 +45,13 @@ type ReportCategory struct {
 	BudgetUsagePercent *float64
 }
 
+type ReportSummary struct {
+	TotalIncome  float64
+	TotalExpense float64
+	Currency     string
+	Categories   []ReportCategory
+}
+
 type TransactionCSVRow struct {
 	AccountID   string
 	Amount      float64
