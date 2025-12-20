@@ -2,7 +2,7 @@ COMPOSE ?= docker compose
 AUTH_POSTGRES_DSN ?= postgres://postgres:postgres@auth-postgres:5432/auth?sslmode=disable
 LEDGER_POSTGRES_DSN ?= postgres://postgres:postgres@ledger-postgres:5432/ledger?sslmode=disable
 
-.PHONY: up down start migrate migrate-auth migrate-ledger migrate-db
+.PHONY: up down start migrate migrate-auth migrate-ledger migrate-db wait-ledger-db
 
 up:
 	$(COMPOSE) up -d
@@ -20,5 +20,8 @@ migrate-db:
 migrate-auth:
 	$(COMPOSE) run --rm auth sh -c "go install github.com/pressly/goose/v3/cmd/goose@latest && goose -dir /app/auth/migrations postgres \"$(AUTH_POSTGRES_DSN)\" up"
 
-migrate-ledger:
+migrate-ledger: wait-ledger-db
 	$(COMPOSE) run --rm ledger sh -c "go install github.com/pressly/goose/v3/cmd/goose@latest && POSTGRES_DSN=$(LEDGER_POSTGRES_DSN) /app/ledger/scripts/migrate.sh"
+
+wait-ledger-db:
+	$(COMPOSE) exec -T ledger-postgres sh -c "until pg_isready -U postgres -d ledger >/dev/null 2>&1; do sleep 1; done"
