@@ -153,6 +153,19 @@ func (s *ValidationService) ExportTransactionsCSV(ctx context.Context, accountID
 	return s.next.ExportTransactionsCSV(ctx, accountID)
 }
 
+func (s *ValidationService) GetReportSummary(ctx context.Context, accountID string, from, to time.Time) (model.ReportSummary, error) {
+	if accountID == "" {
+		return model.ReportSummary{}, fmt.Errorf("%w: account id is required", ErrValidation)
+	}
+	if from.IsZero() || to.IsZero() {
+		return model.ReportSummary{}, fmt.Errorf("%w: report summary dates are required", ErrValidation)
+	}
+	if to.Before(from) {
+		return model.ReportSummary{}, fmt.Errorf("%w: report summary end before start", ErrValidation)
+	}
+	return s.next.GetReportSummary(ctx, accountID, from, to)
+}
+
 func validateTransaction(tx model.Transaction, requireID bool) error {
 	if requireID && tx.ID == "" {
 		return fmt.Errorf("%w: transaction id is required", ErrValidation)

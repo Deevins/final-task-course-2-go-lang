@@ -4,6 +4,7 @@ go 1.25.2
 
 require (
 	github.com/gin-gonic/gin v1.11.0
+	github.com/gojuno/minimock/v3 v3.0.0
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.7.2
 	github.com/redis/go-redis/v9 v9.6.1

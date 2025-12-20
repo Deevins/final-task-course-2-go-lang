@@ -14,6 +14,7 @@ import (
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 
+	"github.com/Deevins/final-task-course-2-go-lang/ledger/internal/cache"
 	"github.com/Deevins/final-task-course-2-go-lang/ledger/internal/config"
 	"github.com/Deevins/final-task-course-2-go-lang/ledger/internal/grpcserver"
 	httpHandler "github.com/Deevins/final-task-course-2-go-lang/ledger/internal/handler/http"
@@ -48,10 +49,13 @@ func New(ctx context.Context, cfg config.Config) (*App, error) {
 		db.Close()
 		return nil, err
 	}
+	log.Printf("connected to redis at %s", cfg.RedisAddr)
 
 	repo := repository.NewPostgresLedgerRepository(db)
 	reportCache := storage.NewReportCache(redisClient, 5*time.Minute)
-	ledgerService := service.NewLedgerService(repo, reportCache)
+	summaryCache := cache.NewReportSummaryCache(redisClient, 30*time.Second)
+	budgetCache := cache.NewBudgetListCache(redisClient, 20*time.Second)
+	ledgerService := service.NewLedgerService(repo, reportCache, summaryCache, budgetCache)
 	validatedService := service.NewValidationService(ledgerService)
 
 	healthHandler := httpHandler.NewHealthHandler()

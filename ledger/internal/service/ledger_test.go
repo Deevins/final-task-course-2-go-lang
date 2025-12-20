@@ -22,7 +22,7 @@ func TestBudgetTransactionsAndReport(t *testing.T) {
 				ctx := context.Background()
 				store := storage.NewInMemoryLedgerStorage()
 				repo := repository.NewInMemoryLedgerRepository(store)
-				service := NewLedgerService(repo, nil)
+				service := NewLedgerService(repo, nil, nil, nil)
 
 				accountID := "account-123"
 				category := "Food"
@@ -113,7 +113,7 @@ func TestBudgetTransactionsAndReport(t *testing.T) {
 				ctx := context.Background()
 				store := storage.NewInMemoryLedgerStorage()
 				repo := repository.NewInMemoryLedgerRepository(store)
-				service := NewLedgerService(repo, nil)
+				service := NewLedgerService(repo, nil, nil, nil)
 
 				accountID := "account-456"
 				category := "Life"
