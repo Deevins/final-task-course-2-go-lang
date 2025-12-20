@@ -11,6 +11,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type LedgerServer struct {
@@ -373,6 +374,13 @@ func toProtoBudget(budget model.Budget) *pb.Budget {
 }
 
 func toModelReport(report *pb.Report) model.Report {
+	categories := make([]model.ReportCategory, 0, len(report.GetCategories()))
+	for _, category := range report.GetCategories() {
+		if category == nil {
+			continue
+		}
+		categories = append(categories, toModelReportCategory(category))
+	}
 	return model.Report{
 		ID:           report.GetId(),
 		AccountID:    report.GetAccountId(),
@@ -382,10 +390,15 @@ func toModelReport(report *pb.Report) model.Report {
 		TotalIncome:  report.GetTotalIncome(),
 		TotalExpense: report.GetTotalExpense(),
 		Currency:     report.GetCurrency(),
+		Categories:   categories,
 	}
 }
 
 func toProtoReport(report model.Report) *pb.Report {
+	categories := make([]*pb.ReportCategory, 0, len(report.Categories))
+	for _, category := range report.Categories {
+		categories = append(categories, toProtoReportCategory(category))
+	}
 	return &pb.Report{
 		Id:           report.ID,
 		AccountId:    report.AccountID,
@@ -395,6 +408,34 @@ func toProtoReport(report model.Report) *pb.Report {
 		TotalIncome:  report.TotalIncome,
 		TotalExpense: report.TotalExpense,
 		Currency:     report.Currency,
+		Categories:   categories,
+	}
+}
+
+func toModelReportCategory(category *pb.ReportCategory) model.ReportCategory {
+	var usagePercent *float64
+	if category.GetBudgetUsagePercent() != nil {
+		value := category.GetBudgetUsagePercent().GetValue()
+		usagePercent = &value
+	}
+	return model.ReportCategory{
+		Category:           category.GetCategory(),
+		TotalExpense:       category.GetTotalExpense(),
+		BudgetAmount:       category.GetBudgetAmount(),
+		BudgetUsagePercent: usagePercent,
+	}
+}
+
+func toProtoReportCategory(category model.ReportCategory) *pb.ReportCategory {
+	var usagePercent *wrapperspb.DoubleValue
+	if category.BudgetUsagePercent != nil {
+		usagePercent = wrapperspb.Double(*category.BudgetUsagePercent)
+	}
+	return &pb.ReportCategory{
+		Category:           category.Category,
+		TotalExpense:       category.TotalExpense,
+		BudgetAmount:       category.BudgetAmount,
+		BudgetUsagePercent: usagePercent,
 	}
 }
 
