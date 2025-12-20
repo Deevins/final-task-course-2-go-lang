@@ -23,5 +23,6 @@ migrate-auth:
 migrate-ledger: wait-ledger-db
 	$(COMPOSE) run --rm ledger sh -c "go install github.com/pressly/goose/v3/cmd/goose@latest && tr -d '\r' < /app/ledger/scripts/migrate.sh > /tmp/migrate.sh && chmod +x /tmp/migrate.sh && POSTGRES_DSN=$(LEDGER_POSTGRES_DSN) /tmp/migrate.sh"
 
+
 wait-ledger-db:
 	$(COMPOSE) exec -T ledger-postgres sh -c "until pg_isready -U postgres -d ledger >/dev/null 2>&1; do sleep 1; done"
