@@ -4,6 +4,17 @@ HTTP gateway для сервисов авторизации и Ledger.
 
 Базовый адрес: `http://localhost:8081`
 
+## Swagger
+
+После запуска сервисов Swagger UI доступен по адресу:
+
+- Gateway Swagger UI: `http://localhost:8081/swagger/index.html`
+
+## Коллекция запросов (Insomnia)
+
+В корне проекта приложен файл `insomnia.json` — импортируйте его в Insomnia, чтобы
+получить коллекцию со всеми эндпоинтами.
+
 
 ## Запуск через Make
 
