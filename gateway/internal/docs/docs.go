@@ -1,8 +1,20 @@
 // Package docs содержит OpenAPI спецификацию для gateway.
 package docs
 
-// SwaggerJSON содержит JSON спецификацию OpenAPI.
-const SwaggerJSON = "swagger.json"
+import _ "embed"
 
-// SwaggerYAML содержит YAML спецификацию OpenAPI.
-const SwaggerYAML = "swagger.yaml"
+//go:embed swagger.json
+var swaggerJSON []byte
+
+//go:embed swagger.yaml
+var swaggerYAML []byte
+
+// SwaggerJSON возвращает JSON спецификацию OpenAPI.
+func SwaggerJSON() []byte {
+	return swaggerJSON
+}
+
+// SwaggerYAML возвращает YAML спецификацию OpenAPI.
+func SwaggerYAML() []byte {
+	return swaggerYAML
+}

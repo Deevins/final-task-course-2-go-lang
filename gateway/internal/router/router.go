@@ -7,6 +7,8 @@ import (
 )
 
 func Register(engine *gin.Engine, authHandler *handler.AuthHandler, ledgerHandler *handler.LedgerHandler, authMiddleware gin.HandlerFunc) {
+	registerSwagger(engine)
+
 	api := engine.Group("/api")
 	authHandler.Register(api)
 	ledgerHandler.Register(api, authMiddleware)
