@@ -6,6 +6,7 @@ import (
 	"encoding/csv"
 	"errors"
 	"fmt"
+	"log"
 	"sort"
 	"strconv"
 	"strings"
@@ -174,7 +175,13 @@ func (s *DefaultLedgerService) ListBudgets(ctx context.Context, accountID string
 	if s.budgetListCache != nil && accountID != "" {
 		cached, err := s.budgetListCache.GetBudgets(ctx)
 		if err == nil {
+			log.Printf("budget list cache hit for account %s", accountID)
 			return cached
+		}
+		if err == cache.ErrNotFound {
+			log.Printf("budget list cache miss for account %s", accountID)
+		} else {
+			log.Printf("budget list cache error for account %s: %v", accountID, err)
 		}
 	}
 	items := s.repo.ListBudgets(ctx, accountID)
@@ -215,12 +222,16 @@ func (s *DefaultLedgerService) GetReport(ctx context.Context, accountID, id stri
 	if s.cache != nil {
 		cached, err := s.cache.GetReport(ctx, id)
 		if err == nil {
+			log.Printf("report cache hit for report %s", id)
 			if cached.AccountID != "" && cached.AccountID != accountID {
 				return model.Report{}, storage.ErrNotFound
 			}
 			return cached, nil
 		}
-		if err != storage.ErrNotFound {
+		if err == storage.ErrNotFound {
+			log.Printf("report cache miss for report %s", id)
+		} else {
+			log.Printf("report cache error for report %s: %v", id, err)
 			return model.Report{}, err
 		}
 	}
@@ -351,9 +362,13 @@ func (s *DefaultLedgerService) GetReportSummary(ctx context.Context, accountID s
 	if s.reportSummaryCache != nil {
 		cached, err := s.reportSummaryCache.GetSummary(ctx, cacheKey)
 		if err == nil {
+			log.Printf("report summary cache hit for key %s", cacheKey)
 			return cached, nil
 		}
-		if err != cache.ErrNotFound {
+		if err == cache.ErrNotFound {
+			log.Printf("report summary cache miss for key %s", cacheKey)
+		} else {
+			log.Printf("report summary cache error for key %s: %v", cacheKey, err)
 			return model.ReportSummary{}, err
 		}
 	}
