@@ -47,6 +47,7 @@ func (s *DefaultAuthService) Register(ctx context.Context, email, password, name
 		CreatedAt:    now,
 		UpdatedAt:    now,
 	}
+
 	return s.repo.CreateUser(ctx, user)
 }
 
@@ -98,6 +99,7 @@ func (s *DefaultAuthService) ValidateToken(ctx context.Context, accessToken stri
 				ExpiresAt:   expiresAt,
 			}, false, nil
 		}
+
 		return model.Token{}, false, err
 	}
 	if !parsedToken.Valid {

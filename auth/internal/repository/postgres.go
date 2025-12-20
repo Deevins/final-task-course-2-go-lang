@@ -41,6 +41,7 @@ func (r *PostgresAuthRepository) CreateUser(ctx context.Context, user model.User
 		}
 		return model.User{}, err
 	}
+
 	return user, nil
 }
 
@@ -64,6 +65,7 @@ func (r *PostgresAuthRepository) GetUserByEmail(ctx context.Context, email strin
 		}
 		return model.User{}, err
 	}
+
 	return user, nil
 }
 
@@ -87,5 +89,6 @@ func (r *PostgresAuthRepository) GetUserByID(ctx context.Context, id string) (mo
 		}
 		return model.User{}, err
 	}
+
 	return user, nil
 }

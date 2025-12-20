@@ -6,6 +6,12 @@ import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/Deevins/final-task-course-2-go-lang/auth/internal/pb/auth/v1";
 
+service AuthService {
+  rpc SignUp(SignUpRequest) returns (SignUpResponse);
+  rpc SignIn(SignInRequest) returns (SignInResponse);
+  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
+}
+
 message SignUpRequest {
   string email = 1;
   string password = 2;
@@ -36,8 +42,3 @@ message ValidateTokenResponse {
   google.protobuf.Timestamp expires_at = 3;
 }
 
-service AuthService {
-  rpc SignUp(SignUpRequest) returns (SignUpResponse);
-  rpc SignIn(SignInRequest) returns (SignInResponse);
-  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
-}

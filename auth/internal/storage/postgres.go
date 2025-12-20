@@ -19,5 +19,6 @@ func NewPostgresPool(ctx context.Context, dsn string) (*pgxpool.Pool, error) {
 		pool.Close()
 		return nil, fmt.Errorf("ping postgres: %w", err)
 	}
+
 	return pool, nil
 }

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -26,8 +27,8 @@ func TestAuthService(t *testing.T) {
 			run: func(t *testing.T) {
 				ctx := context.Background()
 				ctrl := minimock.NewController(t)
-				t.Cleanup(ctrl.Finish)
 				repo := repository.NewAuthRepositoryMock(ctrl)
+
 				jwtConfig := config.JWTConfig{Secret: "test-secret", Expiry: time.Hour}
 				service := NewAuthService(repo, jwtConfig)
 
@@ -89,7 +90,6 @@ func TestAuthService(t *testing.T) {
 			run: func(t *testing.T) {
 				ctx := context.Background()
 				ctrl := minimock.NewController(t)
-				t.Cleanup(ctrl.Finish)
 				repo := repository.NewAuthRepositoryMock(ctrl)
 				jwtConfig := config.JWTConfig{Secret: "test-secret", Expiry: time.Hour}
 				service := NewAuthService(repo, jwtConfig)
@@ -101,7 +101,7 @@ func TestAuthService(t *testing.T) {
 				}
 
 				_, err := service.Login(ctx, user.Email, "wrong")
-				if err != ErrInvalidCredentials {
+				if !errors.Is(err, ErrInvalidCredentials) {
 					t.Fatalf("expected invalid credentials error, got %v", err)
 				}
 			},
@@ -120,12 +120,14 @@ func TestAuthService(t *testing.T) {
 				expiredToken := makeToken(t, jwtConfig.Secret, userID, time.Now().UTC().Add(-time.Minute))
 
 				token, ok, err := service.ValidateToken(ctx, expiredToken)
+
 				if err != nil {
 					t.Fatalf("validate expired token: %v", err)
 				}
 				if ok {
 					t.Fatal("expected expired token to be invalid")
 				}
+
 				if token.UserID != userID {
 					t.Fatalf("expected expired token user ID %q, got %q", userID, token.UserID)
 				}
@@ -136,7 +138,6 @@ func TestAuthService(t *testing.T) {
 			run: func(t *testing.T) {
 				ctx := context.Background()
 				ctrl := minimock.NewController(t)
-				t.Cleanup(ctrl.Finish)
 				repo := repository.NewAuthRepositoryMock(ctrl)
 				jwtConfig := config.JWTConfig{Secret: "test-secret", Expiry: time.Hour}
 				service := NewAuthService(repo, jwtConfig)
@@ -148,12 +149,15 @@ func TestAuthService(t *testing.T) {
 				if err != nil {
 					t.Fatalf("validate token: %v", err)
 				}
+
 				if !ok {
 					t.Fatal("expected token to be valid")
 				}
+
 				if token.UserID != userID {
 					t.Fatalf("expected token user ID %q, got %q", userID, token.UserID)
 				}
+
 			},
 		},
 	}

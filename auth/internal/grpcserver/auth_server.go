@@ -2,6 +2,7 @@ package grpcserver
 
 import (
 	"context"
+	"errors"
 
 	pb "github.com/Deevins/final-task-course-2-go-lang/auth/internal/pb/auth/v1"
 	"github.com/Deevins/final-task-course-2-go-lang/auth/internal/service"
@@ -45,12 +46,13 @@ func (s *AuthServer) SignIn(ctx context.Context, req *pb.SignInRequest) (*pb.Sig
 
 	token, err := s.authService.Login(ctx, req.GetEmail(), req.GetPassword())
 	if err != nil {
-		if err == service.ErrInvalidCredentials {
+		if errors.Is(err, service.ErrInvalidCredentials) {
 			return nil, status.Error(codes.Unauthenticated, "invalid credentials")
 		}
 		if service.IsNotFound(err) {
 			return nil, status.Error(codes.NotFound, "user not found")
 		}
+
 		return nil, status.Errorf(codes.Internal, "login: %v", err)
 	}
 
@@ -70,6 +72,7 @@ func (s *AuthServer) ValidateToken(ctx context.Context, req *pb.ValidateTokenReq
 		if service.IsNotFound(err) {
 			return &pb.ValidateTokenResponse{Valid: false}, nil
 		}
+
 		return nil, status.Errorf(codes.Internal, "validate token: %v", err)
 	}
 
