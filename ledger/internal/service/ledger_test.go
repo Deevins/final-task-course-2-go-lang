@@ -107,6 +107,31 @@ func TestBudgetTransactionsAndReport(t *testing.T) {
 				assertFloatPtrNear(t, categorySummary.BudgetUsagePercent, 90)
 			},
 		},
+		{
+			name: "missing budget blocks transaction",
+			run: func(t *testing.T) {
+				ctx := context.Background()
+				store := storage.NewInMemoryLedgerStorage()
+				repo := repository.NewInMemoryLedgerRepository(store)
+				service := NewLedgerService(repo, nil)
+
+				accountID := "account-456"
+				category := "Life"
+				currency := "USD"
+				start := time.Date(2024, time.June, 1, 0, 0, 0, 0, time.UTC)
+
+				_, err := service.CreateTransaction(ctx, model.Transaction{
+					AccountID:  accountID,
+					Amount:     -20,
+					Currency:   currency,
+					Category:   category,
+					OccurredAt: start.AddDate(0, 0, 3),
+				})
+				if err == nil || !IsBudgetMissing(err) {
+					t.Fatalf("expected budget missing error, got %v", err)
+				}
+			},
+		},
 	}
 
 	for _, tt := range tests {

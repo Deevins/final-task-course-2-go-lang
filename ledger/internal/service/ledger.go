@@ -311,11 +311,9 @@ func (s *DefaultLedgerService) ensureBudgetAvailable(ctx context.Context, tx mod
 		return nil
 	}
 	budgets := s.repo.ListBudgets(ctx, tx.AccountID)
-	if len(budgets) == 0 {
-		return nil
-	}
 	expense := -tx.Amount
 	transactions := s.ListTransactions(ctx, tx.AccountID)
+	matchedBudget := false
 	for _, budget := range budgets {
 		if budget.Currency != tx.Currency {
 			continue
@@ -327,6 +325,7 @@ func (s *DefaultLedgerService) ensureBudgetAvailable(ctx context.Context, tx mod
 		if !withinPeriod(tx.OccurredAt, budgetStart, budgetEnd) {
 			continue
 		}
+		matchedBudget = true
 		total := 0.0
 		for _, existing := range transactions {
 			if existing.Amount >= 0 {
@@ -343,6 +342,14 @@ func (s *DefaultLedgerService) ensureBudgetAvailable(ctx context.Context, tx mod
 		if total+expense > budget.Amount {
 			return fmt.Errorf("%w: %s budget exceeded", ErrBudgetExceeded, budget.Name)
 		}
+	}
+	if !matchedBudget {
+		return fmt.Errorf(
+			"%w: create a budget for category %q in %s before adding transactions",
+			ErrBudgetMissing,
+			tx.Category,
+			tx.OccurredAt.Format("2006-01"),
+		)
 	}
 	return nil
 }

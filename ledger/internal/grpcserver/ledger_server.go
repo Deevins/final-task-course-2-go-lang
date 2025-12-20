@@ -38,6 +38,9 @@ func (s *LedgerServer) CreateTransaction(ctx context.Context, req *pb.CreateTran
 		if service.IsBudgetExceeded(err) {
 			return nil, status.Errorf(codes.FailedPrecondition, "create transaction: %v", err)
 		}
+		if service.IsBudgetMissing(err) {
+			return nil, status.Errorf(codes.FailedPrecondition, "create transaction: %v", err)
+		}
 		return nil, status.Errorf(codes.Internal, "create transaction: %v", err)
 	}
 
