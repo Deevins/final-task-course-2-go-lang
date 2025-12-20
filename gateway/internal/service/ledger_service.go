@@ -169,10 +169,10 @@ func (s *ledgerGatewayService) ListReports(ctx context.Context, accountID string
 func (s *ledgerGatewayService) CreateReport(ctx context.Context, accountID string, req model.CreateReportRequest) (*model.Report, error) {
 	resp, err := s.client.CreateReport(ctx, &ledgerv1.CreateReportRequest{
 		Report: &ledgerv1.Report{
-			AccountId:   accountID,
-			Name:        req.Name,
-			Period:      req.Period,
-			Currency:    req.Currency,
+			AccountId: accountID,
+			Name:      req.Name,
+			Period:    req.Period,
+			Currency:  req.Currency,
 		},
 	})
 	if err != nil {
@@ -192,11 +192,11 @@ func (s *ledgerGatewayService) GetReport(ctx context.Context, accountID, id stri
 func (s *ledgerGatewayService) UpdateReport(ctx context.Context, accountID, id string, req model.UpdateReportRequest) (*model.Report, error) {
 	resp, err := s.client.UpdateReport(ctx, &ledgerv1.UpdateReportRequest{
 		Report: &ledgerv1.Report{
-			Id:          id,
-			AccountId:   accountID,
-			Name:        req.Name,
-			Period:      req.Period,
-			Currency:    req.Currency,
+			Id:        id,
+			AccountId: accountID,
+			Name:      req.Name,
+			Period:    req.Period,
+			Currency:  req.Currency,
 		},
 	})
 	if err != nil {
@@ -307,6 +307,7 @@ func fromProtoReports(items []*ledgerv1.Report) []model.Report {
 		if item == nil {
 			continue
 		}
+		categories := fromProtoReportCategories(item.GetCategories())
 		out = append(out, model.Report{
 			ID:           item.GetId(),
 			AccountID:    item.GetAccountId(),
@@ -316,6 +317,7 @@ func fromProtoReports(items []*ledgerv1.Report) []model.Report {
 			TotalIncome:  item.GetTotalIncome(),
 			TotalExpense: item.GetTotalExpense(),
 			Currency:     item.GetCurrency(),
+			Categories:   categories,
 		})
 	}
 	return out
@@ -334,7 +336,32 @@ func fromProtoReport(item *ledgerv1.Report) *model.Report {
 		TotalIncome:  item.GetTotalIncome(),
 		TotalExpense: item.GetTotalExpense(),
 		Currency:     item.GetCurrency(),
+		Categories:   fromProtoReportCategories(item.GetCategories()),
 	}
+}
+
+func fromProtoReportCategories(items []*ledgerv1.ReportCategory) []model.ReportCategory {
+	if len(items) == 0 {
+		return nil
+	}
+	out := make([]model.ReportCategory, 0, len(items))
+	for _, item := range items {
+		if item == nil {
+			continue
+		}
+		var usagePercent *float64
+		if item.GetBudgetUsagePercent() != nil {
+			value := item.GetBudgetUsagePercent().GetValue()
+			usagePercent = &value
+		}
+		out = append(out, model.ReportCategory{
+			Category:           item.GetCategory(),
+			TotalExpense:       item.GetTotalExpense(),
+			BudgetAmount:       item.GetBudgetAmount(),
+			BudgetUsagePercent: usagePercent,
+		})
+	}
+	return out
 }
 
 func toTime(ts *timestamppb.Timestamp) time.Time {
