@@ -4,16 +4,7 @@ HTTP gateway для сервисов авторизации и Ledger.
 
 Базовый адрес: `http://localhost:8081`
 
-## Swagger
 
-После запуска сервисов Swagger UI доступен по адресу:
-
-- Gateway Swagger UI: `http://localhost:8081/swagger/index.html`
-
-## Коллекция запросов (Insomnia)
-
-В корне проекта приложен файл `insomnia.json` — импортируйте его в Insomnia, чтобы
-получить коллекцию со всеми эндпоинтами.
 
 
 ## Запуск через Make
@@ -40,21 +31,16 @@ make start
 - Ledger Postgres: `localhost:5433` (DB `ledger`, пользователь `postgres`, пароль `postgres`)
 - Ledger Redis: `localhost:6379`
 
-## Миграции (Auth + Ledger)
+## Swagger
 
-Запуск миграций Auth через Docker Compose (отдельная БД):
+После запуска сервисов Swagger UI доступен по адресу:
 
-```bash
-docker compose up -d auth-postgres
-docker compose run --rm auth sh -c "go install github.com/pressly/goose/v3/cmd/goose@latest && goose -dir /app/auth/migrations postgres \"postgres://postgres:postgres@auth-postgres:5432/auth?sslmode=disable\" up"
-```
+- Gateway Swagger UI: `http://localhost:8081/swagger/index.html`
 
-Запуск миграций Ledger через Docker Compose (отдельная БД):
+## Коллекция запросов (Insomnia)
 
-```bash
-docker compose up -d ledger-postgres
-docker compose run --rm ledger sh -c "go install github.com/pressly/goose/v3/cmd/goose@latest && POSTGRES_DSN=postgres://postgres:postgres@ledger-postgres:5432/ledger?sslmode=disable /app/ledger/scripts/migrate.sh"
-```
+В корне проекта приложен файл `insomnia.json` — импортируйте его в Insomnia, чтобы
+получить коллекцию со всеми эндпоинтами.
 
 ## Авторизация (JWT)
 
@@ -223,8 +209,6 @@ curl -X POST http://localhost:8081/api/auth/signin \
 - Импорт/экспорт:
   - `POST /api/ledger/import`
   - `GET /api/ledger/export`
-
-Примечание: интеграции с GSheets нет — используется только CSV импорт/экспорт.
 
 Пример списка транзакций:
 
