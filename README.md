@@ -4,11 +4,6 @@ HTTP gateway для сервисов авторизации и Ledger.
 
 Базовый адрес: `http://localhost:8081`
 
-## Запуск через Docker Compose
-
-```bash
-docker compose up
-```
 
 ## Запуск через Make
 

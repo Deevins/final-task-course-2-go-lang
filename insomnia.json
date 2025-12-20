@@ -1,0 +1,429 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2024-01-01T00:00:00.000Z",
+  "__export_source": "insomnia.desktop.app:v2023.5.8",
+  "resources": [
+    {
+      "_id": "wrk_618ba3ef6c48",
+      "_type": "workspace",
+      "name": "Gateway API",
+      "description": "HTTP API gateway for auth and ledger services."
+    },
+    {
+      "_id": "env_cd00e6261ca2",
+      "_type": "environment",
+      "parentId": "wrk_618ba3ef6c48",
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:8080",
+        "token": "",
+        "transaction_id": "",
+        "budget_id": "",
+        "report_id": ""
+      }
+    },
+    {
+      "_id": "fld_b4c996dd4f2a",
+      "_type": "request_group",
+      "parentId": "wrk_618ba3ef6c48",
+      "name": "Gateway"
+    },
+    {
+      "_id": "req_c4015b1aaaf8",
+      "_type": "request",
+      "parentId": "fld_b4c996dd4f2a",
+      "name": "Войти в систему",
+      "method": "POST",
+      "url": "{{ base_url }}/api/auth/signin",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"secret\"\n}"
+      }
+    },
+    {
+      "_id": "req_dee873f89d34",
+      "_type": "request",
+      "parentId": "fld_b4c996dd4f2a",
+      "name": "Зарегистрировать пользователя",
+      "method": "POST",
+      "url": "{{ base_url }}/api/auth/signup",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"secret\",\n  \"name\": \"Иван Иванов\"\n}"
+      }
+    },
+    {
+      "_id": "req_7940e59dd6eb",
+      "_type": "request",
+      "parentId": "fld_b4c996dd4f2a",
+      "name": "Импортировать транзакции из CSV",
+      "method": "POST",
+      "url": "{{ base_url }}/api/ledger/import",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"csv_content\": \"account_id,amount,currency,category,description,occurred_at\"\n}"
+      }
+    },
+    {
+      "_id": "req_1311bb4024bd",
+      "_type": "request",
+      "parentId": "fld_b4c996dd4f2a",
+      "name": "Обновить бюджет",
+      "method": "PUT",
+      "url": "{{ base_url }}/api/ledger/budgets/{{ budget_id }}",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Еда\",\n  \"amount\": 10000,\n  \"currency\": \"RUB\",\n  \"period\": \"monthly\",\n  \"month\": \"2024-01-01T00:00:00Z\"\n}"
+      }
+    },
+    {
+      "_id": "req_b2ad7838fdd2",
+      "_type": "request",
+      "parentId": "fld_b4c996dd4f2a",
+      "name": "Обновить бюджет",
+      "method": "PATCH",
+      "url": "{{ base_url }}/api/ledger/budgets/{{ budget_id }}",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Еда\",\n  \"amount\": 10000,\n  \"currency\": \"RUB\",\n  \"period\": \"monthly\",\n  \"month\": \"2024-01-01T00:00:00Z\"\n}"
+      }
+    },
+    {
+      "_id": "req_2722516e6636",
+      "_type": "request",
+      "parentId": "fld_b4c996dd4f2a",
+      "name": "Обновить отчет",
+      "method": "PUT",
+      "url": "{{ base_url }}/api/ledger/reports/{{ report_id }}",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Январь 2024\",\n  \"period\": \"2024-01\",\n  \"generated_at\": \"2024-01-31T23:59:59Z\",\n  \"currency\": \"RUB\"\n}"
+      }
+    },
+    {
+      "_id": "req_504d4feee1f4",
+      "_type": "request",
+      "parentId": "fld_b4c996dd4f2a",
+      "name": "Обновить отчет",
+      "method": "PATCH",
+      "url": "{{ base_url }}/api/ledger/reports/{{ report_id }}",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Январь 2024\",\n  \"period\": \"2024-01\",\n  \"generated_at\": \"2024-01-31T23:59:59Z\",\n  \"currency\": \"RUB\"\n}"
+      }
+    },
+    {
+      "_id": "req_606fc729941c",
+      "_type": "request",
+      "parentId": "fld_b4c996dd4f2a",
+      "name": "Обновить транзакцию",
+      "method": "PUT",
+      "url": "{{ base_url }}/api/ledger/transactions/{{ transaction_id }}",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"amount\": 1250.5,\n  \"currency\": \"RUB\",\n  \"category\": \"Продукты\",\n  \"occurred_at\": \"2024-01-01T10:00:00Z\"\n}"
+      }
+    },
+    {
+      "_id": "req_2451cccd1758",
+      "_type": "request",
+      "parentId": "fld_b4c996dd4f2a",
+      "name": "Обновить транзакцию",
+      "method": "PATCH",
+      "url": "{{ base_url }}/api/ledger/transactions/{{ transaction_id }}",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"amount\": 1250.5,\n  \"currency\": \"RUB\",\n  \"category\": \"Продукты\",\n  \"occurred_at\": \"2024-01-01T10:00:00Z\"\n}"
+      }
+    },
+    {
+      "_id": "req_56419bb83f00",
+      "_type": "request",
+      "parentId": "fld_b4c996dd4f2a",
+      "name": "Получить бюджет",
+      "method": "GET",
+      "url": "{{ base_url }}/api/ledger/budgets/{{ budget_id }}",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ token }}"
+        }
+      ]
+    },
+    {
+      "_id": "req_1de6faf3d8bf",
+      "_type": "request",
+      "parentId": "fld_b4c996dd4f2a",
+      "name": "Получить отчет",
+      "method": "GET",
+      "url": "{{ base_url }}/api/ledger/reports/{{ report_id }}",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ token }}"
+        }
+      ]
+    },
+    {
+      "_id": "req_1287de4cf2cb",
+      "_type": "request",
+      "parentId": "fld_b4c996dd4f2a",
+      "name": "Получить список бюджетов",
+      "method": "GET",
+      "url": "{{ base_url }}/api/ledger/budgets",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ token }}"
+        }
+      ]
+    },
+    {
+      "_id": "req_b6317e24bc57",
+      "_type": "request",
+      "parentId": "fld_b4c996dd4f2a",
+      "name": "Получить список отчетов",
+      "method": "GET",
+      "url": "{{ base_url }}/api/ledger/reports",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ token }}"
+        }
+      ]
+    },
+    {
+      "_id": "req_84e2e2ee6eaf",
+      "_type": "request",
+      "parentId": "fld_b4c996dd4f2a",
+      "name": "Получить список транзакций",
+      "method": "GET",
+      "url": "{{ base_url }}/api/ledger/transactions",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ token }}"
+        }
+      ]
+    },
+    {
+      "_id": "req_10ca778dd4cb",
+      "_type": "request",
+      "parentId": "fld_b4c996dd4f2a",
+      "name": "Получить транзакцию",
+      "method": "GET",
+      "url": "{{ base_url }}/api/ledger/transactions/{{ transaction_id }}",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ token }}"
+        }
+      ]
+    },
+    {
+      "_id": "req_9eee0fa8f9dd",
+      "_type": "request",
+      "parentId": "fld_b4c996dd4f2a",
+      "name": "Создать бюджет",
+      "method": "POST",
+      "url": "{{ base_url }}/api/ledger/budgets",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Еда\",\n  \"amount\": 10000,\n  \"currency\": \"RUB\",\n  \"period\": \"monthly\",\n  \"month\": \"2024-01-01T00:00:00Z\"\n}"
+      }
+    },
+    {
+      "_id": "req_03d14505936d",
+      "_type": "request",
+      "parentId": "fld_b4c996dd4f2a",
+      "name": "Создать отчет",
+      "method": "POST",
+      "url": "{{ base_url }}/api/ledger/reports",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Январь 2024\",\n  \"period\": \"2024-01\",\n  \"generated_at\": \"2024-01-31T23:59:59Z\",\n  \"currency\": \"RUB\"\n}"
+      }
+    },
+    {
+      "_id": "req_7899cab783cb",
+      "_type": "request",
+      "parentId": "fld_b4c996dd4f2a",
+      "name": "Создать транзакцию",
+      "method": "POST",
+      "url": "{{ base_url }}/api/ledger/transactions",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ token }}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"amount\": 1250.5,\n  \"currency\": \"RUB\",\n  \"category\": \"Продукты\",\n  \"occurred_at\": \"2024-01-01T10:00:00Z\"\n}"
+      }
+    },
+    {
+      "_id": "req_0335df372ef7",
+      "_type": "request",
+      "parentId": "fld_b4c996dd4f2a",
+      "name": "Удалить бюджет",
+      "method": "DELETE",
+      "url": "{{ base_url }}/api/ledger/budgets/{{ budget_id }}",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ token }}"
+        }
+      ]
+    },
+    {
+      "_id": "req_040e2a5af7c0",
+      "_type": "request",
+      "parentId": "fld_b4c996dd4f2a",
+      "name": "Удалить отчет",
+      "method": "DELETE",
+      "url": "{{ base_url }}/api/ledger/reports/{{ report_id }}",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ token }}"
+        }
+      ]
+    },
+    {
+      "_id": "req_aff91a2dbbd4",
+      "_type": "request",
+      "parentId": "fld_b4c996dd4f2a",
+      "name": "Удалить транзакцию",
+      "method": "DELETE",
+      "url": "{{ base_url }}/api/ledger/transactions/{{ transaction_id }}",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ token }}"
+        }
+      ]
+    },
+    {
+      "_id": "req_e7324d0ccc7b",
+      "_type": "request",
+      "parentId": "fld_b4c996dd4f2a",
+      "name": "Экспортировать транзакции в CSV",
+      "method": "GET",
+      "url": "{{ base_url }}/api/ledger/export",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ token }}"
+        }
+      ]
+    }
+  ]
+}
