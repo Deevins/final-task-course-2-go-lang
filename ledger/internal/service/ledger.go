@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"sort"
 	"strconv"
@@ -342,7 +343,7 @@ func (s *DefaultLedgerService) ExportTransactionsCSV(ctx context.Context, accoun
 }
 
 func IsNotFound(err error) bool {
-	return err == storage.ErrNotFound
+	return errors.Is(err, storage.ErrNotFound)
 }
 
 func (s *DefaultLedgerService) GetReportSummary(ctx context.Context, accountID string, from, to time.Time) (model.ReportSummary, error) {

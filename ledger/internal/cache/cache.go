@@ -47,7 +47,7 @@ func (c *RedisReportSummaryCache) GetSummary(ctx context.Context, key string) (m
 	}
 	value, err := c.client.Get(ctx, key).Result()
 	if err != nil {
-		if err == redis.Nil {
+		if errors.Is(err, redis.Nil) {
 			return model.ReportSummary{}, ErrNotFound
 		}
 		return model.ReportSummary{}, fmt.Errorf("get report summary cache: %w", err)
@@ -88,7 +88,7 @@ func NewBudgetListCache(client *redis.Client, ttl time.Duration) *RedisBudgetLis
 func (c *RedisBudgetListCache) GetBudgets(ctx context.Context) ([]model.Budget, error) {
 	value, err := c.client.Get(ctx, budgetListCacheKey).Result()
 	if err != nil {
-		if err == redis.Nil {
+		if errors.Is(err, redis.Nil) {
 			return nil, ErrNotFound
 		}
 		return nil, fmt.Errorf("get budget list cache: %w", err)

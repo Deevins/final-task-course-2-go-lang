@@ -119,9 +119,9 @@ func (s *DefaultAuthService) ValidateToken(ctx context.Context, accessToken stri
 }
 
 func IsNotFound(err error) bool {
-	return err == storage.ErrNotFound
+	return errors.Is(err, storage.ErrNotFound)
 }
 
 func IsDuplicate(err error) bool {
-	return err == storage.ErrDuplicate
+	return errors.Is(err, storage.ErrDuplicate)
 }
