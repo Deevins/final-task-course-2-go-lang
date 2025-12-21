@@ -1,0 +1,1649 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "HTTP API gateway for auth and ledger services.",
+    "title": "Gateway API",
+    "version": "1.0"
+  },
+  "basePath": "/",
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/api/auth/signup": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Зарегистрировать пользователя",
+        "description": "Создает нового пользователя и возвращает его идентификатор.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SignUpRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/SignUpResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/signin": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Войти в систему",
+        "description": "Проверяет учетные данные и возвращает JWT токен.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SignInRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/SignInResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/api/ledger/transactions": {
+      "get": {
+        "tags": [
+          "ledger"
+        ],
+        "summary": "Получить список транзакций",
+        "description": "Возвращает транзакции пользователя из Ledger.",
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/TransactionsResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ledger"
+        ],
+        "summary": "Создать транзакцию",
+        "description": "Создает транзакцию. Если account_id не указан, берется из JWT.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateTransactionRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/Transaction"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/api/ledger/budgets": {
+      "get": {
+        "tags": [
+          "ledger"
+        ],
+        "summary": "Получить список бюджетов",
+        "description": "Возвращает бюджеты из Ledger.",
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BudgetsResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ledger"
+        ],
+        "summary": "Создать бюджет",
+        "description": "Создает бюджет в Ledger.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateBudgetRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/Budget"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/api/ledger/reports": {
+      "get": {
+        "tags": [
+          "ledger"
+        ],
+        "summary": "Получить список отчетов",
+        "description": "Возвращает отчеты из Ledger.",
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ReportsResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ledger"
+        ],
+        "summary": "Создать отчет",
+        "description": "Создает отчет в Ledger.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateReportRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/Report"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/api/ledger/import": {
+      "post": {
+        "tags": [
+          "ledger"
+        ],
+        "summary": "Импортировать транзакции из CSV",
+        "description": "Принимает CSV контент и импортирует транзакции.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ImportTransactionsRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ImportTransactionsResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/api/ledger/export": {
+      "get": {
+        "tags": [
+          "ledger"
+        ],
+        "summary": "Экспортировать транзакции в CSV",
+        "description": "Возвращает CSV контент транзакций пользователя.",
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ExportTransactionsResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/api/ledger/transactions/{id}": {
+      "get": {
+        "tags": [
+          "ledger"
+        ],
+        "summary": "Получить транзакцию",
+        "description": "Возвращает транзакцию по идентификатору.",
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Transaction"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "ledger"
+        ],
+        "summary": "Обновить транзакцию",
+        "description": "Обновляет транзакцию по идентификатору.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateTransactionRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Transaction"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "ledger"
+        ],
+        "summary": "Обновить транзакцию",
+        "description": "Обновляет транзакцию по идентификатору.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateTransactionRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Transaction"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "ledger"
+        ],
+        "summary": "Удалить транзакцию",
+        "description": "Удаляет транзакцию по идентификатору.",
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/DeleteResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/api/ledger/budgets/{id}": {
+      "get": {
+        "tags": [
+          "ledger"
+        ],
+        "summary": "Получить бюджет",
+        "description": "Возвращает бюджет по идентификатору.",
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Budget"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "ledger"
+        ],
+        "summary": "Обновить бюджет",
+        "description": "Обновляет бюджет по идентификатору.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateBudgetRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Budget"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "ledger"
+        ],
+        "summary": "Обновить бюджет",
+        "description": "Обновляет бюджет по идентификатору.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateBudgetRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Budget"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "ledger"
+        ],
+        "summary": "Удалить бюджет",
+        "description": "Удаляет бюджет по идентификатору.",
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/DeleteResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/api/ledger/reports/{id}": {
+      "get": {
+        "tags": [
+          "ledger"
+        ],
+        "summary": "Получить отчет",
+        "description": "Возвращает отчет по идентификатору.",
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Report"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "ledger"
+        ],
+        "summary": "Обновить отчет",
+        "description": "Обновляет отчет по идентификатору.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateReportRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Report"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "ledger"
+        ],
+        "summary": "Обновить отчет",
+        "description": "Обновляет отчет по идентификатору.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateReportRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Report"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "ledger"
+        ],
+        "summary": "Удалить отчет",
+        "description": "Удаляет отчет по идентификатору.",
+        "produces": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/DeleteResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "BearerAuth": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header",
+      "description": "Bearer JWT token. Example: 'Bearer {token}'"
+    }
+  },
+  "definitions": {
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string",
+          "example": "validation failed"
+        }
+      }
+    },
+    "SignUpRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "example": "user@example.com"
+        },
+        "password": {
+          "type": "string",
+          "example": "secret"
+        },
+        "name": {
+          "type": "string",
+          "example": "Иван Иванов"
+        }
+      },
+      "required": [
+        "email",
+        "password",
+        "name"
+      ]
+    },
+    "SignUpResponse": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "example": "11111111-1111-1111-1111-111111111111"
+        }
+      }
+    },
+    "SignInRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "example": "user@example.com"
+        },
+        "password": {
+          "type": "string",
+          "example": "secret"
+        }
+      },
+      "required": [
+        "email",
+        "password"
+      ]
+    },
+    "SignInResponse": {
+      "type": "object",
+      "properties": {
+        "access_token": {
+          "type": "string",
+          "example": "eyJhbGciOi..."
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2024-01-01T10:00:00Z"
+        }
+      }
+    },
+    "Transaction": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "11111111-1111-1111-1111-111111111111"
+        },
+        "account_id": {
+          "type": "string",
+          "example": "22222222-2222-2222-2222-222222222222"
+        },
+        "amount": {
+          "type": "number",
+          "format": "double",
+          "example": 1250.5
+        },
+        "currency": {
+          "type": "string",
+          "example": "RUB"
+        },
+        "category": {
+          "type": "string",
+          "example": "Продукты"
+        },
+        "description": {
+          "type": "string",
+          "example": "Покупка в магазине"
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2024-01-01T10:00:00Z"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2024-01-01T10:00:00Z"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2024-01-01T10:00:00Z"
+        }
+      }
+    },
+    "CreateTransactionRequest": {
+      "type": "object",
+      "properties": {
+        "account_id": {
+          "type": "string",
+          "example": "22222222-2222-2222-2222-222222222222"
+        },
+        "amount": {
+          "type": "number",
+          "format": "double",
+          "example": 1250.5
+        },
+        "currency": {
+          "type": "string",
+          "example": "RUB"
+        },
+        "category": {
+          "type": "string",
+          "example": "Продукты"
+        },
+        "description": {
+          "type": "string",
+          "example": "Покупка в магазине"
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2024-01-01T10:00:00Z"
+        }
+      },
+      "required": [
+        "amount",
+        "currency",
+        "category",
+        "occurred_at"
+      ]
+    },
+    "Budget": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "11111111-1111-1111-1111-111111111111"
+        },
+        "name": {
+          "type": "string",
+          "example": "Еда"
+        },
+        "amount": {
+          "type": "number",
+          "format": "double",
+          "example": 10000
+        },
+        "currency": {
+          "type": "string",
+          "example": "RUB"
+        },
+        "period": {
+          "type": "string",
+          "example": "monthly"
+        },
+        "month": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2024-01-01T00:00:00Z"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2024-01-01T00:00:00Z"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2024-01-01T00:00:00Z"
+        },
+        "account_id": {
+          "type": "string",
+          "example": "22222222-2222-2222-2222-222222222222"
+        }
+      }
+    },
+    "CreateBudgetRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "Еда"
+        },
+        "amount": {
+          "type": "number",
+          "format": "double",
+          "example": 10000
+        },
+        "currency": {
+          "type": "string",
+          "example": "RUB"
+        },
+        "period": {
+          "type": "string",
+          "example": "monthly"
+        },
+        "month": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2024-01-01T00:00:00Z"
+        }
+      },
+      "required": [
+        "name",
+        "amount",
+        "currency",
+        "period",
+        "month"
+      ]
+    },
+    "Report": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "11111111-1111-1111-1111-111111111111"
+        },
+        "name": {
+          "type": "string",
+          "example": "Январь 2024"
+        },
+        "period": {
+          "type": "string",
+          "description": "YYYY-MM или start/end (YYYY-MM-DD или RFC3339), например 2024-01-01/2024-01-31",
+          "example": "2024-01"
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2024-01-31T23:59:59Z"
+        },
+        "total_income": {
+          "type": "number",
+          "format": "double",
+          "example": 50000
+        },
+        "total_expense": {
+          "type": "number",
+          "format": "double",
+          "example": 30000
+        },
+        "currency": {
+          "type": "string",
+          "example": "RUB"
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ReportCategory"
+          }
+        },
+        "account_id": {
+          "type": "string",
+          "example": "22222222-2222-2222-2222-222222222222"
+        }
+      }
+    },
+    "ReportCategory": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "string",
+          "example": "Продукты"
+        },
+        "total_expense": {
+          "type": "number",
+          "format": "double",
+          "example": 30000
+        },
+        "budget_amount": {
+          "type": "number",
+          "format": "double",
+          "example": 50000
+        },
+        "budget_usage_percent": {
+          "type": "number",
+          "format": "double",
+          "example": 60,
+          "x-nullable": true
+        }
+      }
+    },
+    "CreateReportRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "Январь 2024"
+        },
+        "period": {
+          "type": "string",
+          "description": "YYYY-MM или start/end (YYYY-MM-DD или RFC3339), например 2024-01-01/2024-01-31",
+          "example": "2024-01"
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2024-01-31T23:59:59Z"
+        },
+        "currency": {
+          "type": "string",
+          "example": "RUB"
+        }
+      },
+      "required": [
+        "name",
+        "period",
+        "generated_at",
+        "currency"
+      ]
+    },
+    "ImportTransactionsRequest": {
+      "type": "object",
+      "properties": {
+        "csv_content": {
+          "type": "string",
+          "example": "account_id,amount,currency,category,description,occurred_at"
+        },
+        "has_header": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "csv_content"
+      ]
+    },
+    "ImportTransactionsResponse": {
+      "type": "object",
+      "properties": {
+        "imported": {
+          "type": "integer",
+          "format": "int32",
+          "example": 3
+        }
+      }
+    },
+    "ExportTransactionsResponse": {
+      "type": "object",
+      "properties": {
+        "csv_content": {
+          "type": "string",
+          "example": "account_id,amount,currency,category,description,occurred_at"
+        }
+      }
+    },
+    "TransactionsResponse": {
+      "type": "object",
+      "properties": {
+        "transactions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Transaction"
+          }
+        }
+      }
+    },
+    "BudgetsResponse": {
+      "type": "object",
+      "properties": {
+        "budgets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Budget"
+          }
+        }
+      }
+    },
+    "ReportsResponse": {
+      "type": "object",
+      "properties": {
+        "reports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Report"
+          }
+        }
+      }
+    },
+    "UpdateTransactionRequest": {
+      "type": "object",
+      "properties": {
+        "account_id": {
+          "type": "string",
+          "example": "22222222-2222-2222-2222-222222222222"
+        },
+        "amount": {
+          "type": "number",
+          "format": "double",
+          "example": 1250.5
+        },
+        "currency": {
+          "type": "string",
+          "example": "RUB"
+        },
+        "category": {
+          "type": "string",
+          "example": "Продукты"
+        },
+        "description": {
+          "type": "string",
+          "example": "Покупка в магазине"
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2024-01-01T10:00:00Z"
+        }
+      },
+      "required": [
+        "amount",
+        "currency",
+        "category",
+        "occurred_at"
+      ]
+    },
+    "UpdateBudgetRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "Еда"
+        },
+        "amount": {
+          "type": "number",
+          "format": "double",
+          "example": 10000
+        },
+        "currency": {
+          "type": "string",
+          "example": "RUB"
+        },
+        "period": {
+          "type": "string",
+          "example": "monthly"
+        },
+        "month": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2024-01-01T00:00:00Z"
+        }
+      },
+      "required": [
+        "name",
+        "amount",
+        "currency",
+        "period",
+        "month"
+      ]
+    },
+    "UpdateReportRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "Январь 2024"
+        },
+        "period": {
+          "type": "string",
+          "description": "YYYY-MM или start/end (YYYY-MM-DD или RFC3339), например 2024-01-01/2024-01-31",
+          "example": "2024-01"
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2024-01-31T23:59:59Z"
+        },
+        "currency": {
+          "type": "string",
+          "example": "RUB"
+        }
+      },
+      "required": [
+        "name",
+        "period",
+        "generated_at",
+        "currency"
+      ]
+    },
+    "DeleteResponse": {
+      "type": "object",
+      "properties": {
+        "deleted": {
+          "type": "boolean",
+          "example": true
+        }
+      }
+    }
+  }
+}
